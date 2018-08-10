@@ -36,13 +36,18 @@ public class GremlinSourceVertexWriter implements GremlinSourceWriter {
 
         for (final Field field : FieldUtils.getAllFields(domain.getClass())) {
             final PersistentProperty property = persistentEntity.getPersistentProperty(field.getName());
-            Assert.notNull(property, "persistence property should not be null");
 
-            if (field.getName().equals(Constants.PROPERTY_ID) || field.getAnnotation(Id.class) != null) {
-                continue;
+            // If we add transient checks when building, it is possible for persistent property to be null.
+            if (property != null) {
+                //Assert.notNull(property, field.getName() + " persistence property should not be null");
+
+                if (field.getName().equals(Constants.PROPERTY_ID) ||
+                    field.getAnnotation(Id.class) != null) {
+                    continue;
+                }
+
+                source.setProperty(field.getName(), accessor.getProperty(property));
             }
-
-            source.setProperty(field.getName(), accessor.getProperty(property));
         }
     }
 }

@@ -39,20 +39,26 @@ public class GremlinSourceEdgeReader implements GremlinSourceReader {
 
        for (final Field field : FieldUtils.getAllFields(type)) {
            final PersistentProperty property = persistentEntity.getPersistentProperty(field.getName());
-           Assert.notNull(property, "persistence property should not be null");
 
-           if (field.getName().equals(PROPERTY_ID) || field.getAnnotation(Id.class) != null) {
-               accessor.setProperty(property, source.getId());
-               continue;
-           } else if (field.getAnnotation(EdgeFrom.class) != null || field.getAnnotation(EdgeTo.class) != null) {
-               // We cannot do that here as the gremlin will not tell more information about vertex except Id. After the
-               // query of Edge end, we can get the Id of vertex from/to. And then we will do extra 2 query to obtain
-               // the 2 vertex and complete the edge.
-               // That work will be wrapped in GremlinTemplate insert, and skip the property here.
-               continue;
+           if (property != null) {
+               Assert.notNull(property, "persistence property should not be null");
+
+               if (field.getName().equals(PROPERTY_ID) ||
+                   field.getAnnotation(Id.class) != null) {
+                   accessor.setProperty(property, source.getId());
+                   continue;
+               } else if (field.getAnnotation(EdgeFrom.class) != null ||
+                   field.getAnnotation(EdgeTo.class) != null) {
+                   // We cannot do that here as the gremlin will not tell more information
+                   // about vertex except Id. After the query of Edge end, we can get the
+                   // Id of vertex from/to. And then we will do extra 2 query to obtain
+                   // the 2 vertex and complete the edge.
+                   // That work will be wrapped in GremlinTemplate insert, and skip the property here.
+                   continue;
+               }
+
+               accessor.setProperty(property, source.getProperties().get(field.getName()));
            }
-
-           accessor.setProperty(property, source.getProperties().get(field.getName()));
        }
 
        return domain;

@@ -51,16 +51,22 @@ public class GremlinSourceGraphWriter implements GremlinSourceWriter {
 
         for (final Field field : FieldUtils.getAllFields(domain.getClass())) {
             final PersistentProperty property = persistentEntity.getPersistentProperty(field.getName());
-            Assert.notNull(property, "persistence property should not be null");
 
-            if (field.getName().equals(Constants.PROPERTY_ID) || field.getAnnotation(Id.class) != null) {
-                continue;
-            }
+            if (property != null) {
+                Assert.notNull(property, "persistence property should not be null");
 
-            @SuppressWarnings("unchecked") final List<Object> objects = (List<Object>) accessor.getProperty(property);
+                if (field.getName().equals(Constants.PROPERTY_ID) ||
+                    field.getAnnotation(Id.class) != null) {
+                    continue;
+                }
 
-            if (field.getAnnotation(VertexSet.class) != null || field.getAnnotation(EdgeSet.class) != null) {
-                this.writeGraphSet(objects, converter, sourceGraph);
+                @SuppressWarnings("unchecked") final List<Object> objects =
+                    (List<Object>) accessor.getProperty(property);
+
+                if (field.getAnnotation(VertexSet.class) != null ||
+                    field.getAnnotation(EdgeSet.class) != null) {
+                    this.writeGraphSet(objects, converter, sourceGraph);
+                }
             }
         }
     }
