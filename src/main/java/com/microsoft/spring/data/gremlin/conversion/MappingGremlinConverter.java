@@ -86,10 +86,14 @@ public class MappingGremlinConverter
         final ConvertingPropertyAccessor accessor = this.getPropertyAccessor(domain);
         final GremlinPersistentEntity<?> persistentEntity = this.getPersistentEntity(domain.getClass());
         final PersistentProperty property = persistentEntity.getPersistentProperty(fieldName);
-        Assert.notNull(property, "persistence property should not be null");
+
+        Assert.notNull(property, "persistence property " + fieldName +
+            " on domain class " + domain.getClass().getSimpleName() + " should not be null");
 
         final Object value = accessor.getProperty(property);
-        Assert.notNull(value, "PersistentProperty should not be null");
+
+        Assert.notNull(value, "persistence property value for " + property +
+            " on domain class " + domain.getClass().getSimpleName() + " should not be null");
 
         return value;
     }
