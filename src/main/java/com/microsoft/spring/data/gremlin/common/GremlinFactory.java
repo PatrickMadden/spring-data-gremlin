@@ -29,12 +29,14 @@ public class GremlinFactory {
     private String port;
     private String username;
     private String password;
+    private boolean enableSsl = true;
 
     @Autowired(required = false)
     private TelemetryTracker telemetryTracker;
 
     public GremlinFactory(@NonNull String endpoint, @Nullable String port,
-                          @NonNull String username, @NonNull String password) {
+                          @NonNull String username, @NonNull String password,
+                          boolean enableSsl) {
 
         if (port == null || port.isEmpty()) {
             this.port = Constants.DEFAULT_ENDPOINT_PORT;
@@ -45,6 +47,7 @@ public class GremlinFactory {
         this.endpoint = endpoint;
         this.username = username;
         this.password = password;
+        this.enableSsl = enableSsl;
     }
 
     private void trackTelemetryCustomEvent() {
@@ -55,7 +58,7 @@ public class GremlinFactory {
         TelemetryUtils.telemetryTriggerEvent(telemetryTracker, getClass().getSimpleName(), customProperties);
     }
 
-    private Cluster createGremlinCluster() throws GremlinIllegalConfigurationException {
+    protected Cluster createGremlinCluster() throws GremlinIllegalConfigurationException {
         final int port;
         final Cluster cluster;
 
@@ -64,7 +67,7 @@ public class GremlinFactory {
             cluster = Cluster.build(this.endpoint)
                     .serializer(Serializers.DEFAULT_RESULT_SERIALIZER)
                     .credentials(this.username, this.password)
-                    .enableSsl(true)
+                    .enableSsl(this.enableSsl)
                     .port(port)
                     .create();
         } catch (IllegalArgumentException e) {

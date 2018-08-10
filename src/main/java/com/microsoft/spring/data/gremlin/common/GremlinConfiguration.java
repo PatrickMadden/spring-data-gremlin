@@ -22,5 +22,7 @@ public class GremlinConfiguration {
 
     private String password;
 
+    private boolean sslEnabled = true;
+
     private boolean telemetryAllowed = true;
 }

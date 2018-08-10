@@ -27,7 +27,11 @@ public abstract class AbstractGremlinConfiguration extends GremlinConfigurationS
     public GremlinFactory gremlinFactory() {
         final GremlinConfiguration config = getGremlinConfiguration();
 
-        return new GremlinFactory(config.getEndpoint(), config.getPort(), config.getUsername(), config.getPassword());
+        return new GremlinFactory(config.getEndpoint(),
+            config.getPort(),
+            config.getUsername(),
+            config.getPassword(),
+            config.isSslEnabled());
     }
 
     @Bean
@@ -39,5 +43,4 @@ public abstract class AbstractGremlinConfiguration extends GremlinConfigurationS
     public GremlinTemplate gremlinTemplate(GremlinFactory factory) throws ClassNotFoundException {
         return new GremlinTemplate(factory, mappingGremlinConverter());
     }
-
 }

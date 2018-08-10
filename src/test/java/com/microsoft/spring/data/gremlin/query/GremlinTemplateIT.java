@@ -72,7 +72,7 @@ public class GremlinTemplateIT {
     public void setup() {
         final GremlinMappingContext mappingContext = new GremlinMappingContext();
         factory = new GremlinFactory(this.config.getEndpoint(), this.config.getPort(),
-                this.config.getUsername(), this.config.getPassword());
+                this.config.getUsername(), this.config.getPassword(), this.config.isSslEnabled());
 
         mappingContext.setInitialEntitySet(new EntityScanner(this.context).scan(Persistent.class));
 

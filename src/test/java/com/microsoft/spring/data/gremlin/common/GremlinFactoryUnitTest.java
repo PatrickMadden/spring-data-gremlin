@@ -15,7 +15,7 @@ public class GremlinFactoryUnitTest {
     @Test(expected = GremlinIllegalConfigurationException.class)
     public void testGremlinFactoryException() {
         final GremlinFactory factory = new GremlinFactory(TestConstants.FAKE_ENDPOINT, null,
-                TestConstants.FAKE_USERNAME, TestConstants.FAKE_PASSWORD);
+                TestConstants.FAKE_USERNAME, TestConstants.FAKE_PASSWORD, true);
 
         factory.getGremlinClient();
     }
@@ -26,7 +26,7 @@ public class GremlinFactoryUnitTest {
         final GremlinFactory factory;
 
         factory = new GremlinFactory(TestConstants.EMPTY_STRING, TestConstants.EMPTY_STRING,
-                TestConstants.EMPTY_STRING, TestConstants.EMPTY_STRING);
+                TestConstants.EMPTY_STRING, TestConstants.EMPTY_STRING, true);
         client = factory.getGremlinClient();
 
         Assert.assertEquals(client.getCluster().getPort(), TestConstants.DEFAULT_ENDPOINT_PORT);
