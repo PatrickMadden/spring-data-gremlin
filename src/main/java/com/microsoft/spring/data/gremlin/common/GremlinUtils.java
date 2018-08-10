@@ -9,6 +9,7 @@ import com.microsoft.spring.data.gremlin.exception.GremlinInvalidEntityIdFieldEx
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import org.apache.commons.lang3.reflect.FieldUtils;
+import org.apache.tinkerpop.shaded.jackson.annotation.JsonAutoDetect;
 import org.apache.tinkerpop.shaded.jackson.databind.MapperFeature;
 import org.apache.tinkerpop.shaded.jackson.databind.ObjectMapper;
 import org.springframework.data.annotation.Id;
@@ -25,7 +26,14 @@ public class GremlinUtils {
     private static final ObjectMapper mapper = new ObjectMapper();
 
     static {
-        mapper.configure(MapperFeature.AUTO_DETECT_FIELDS, false);
+//        mapper.enable(MapperFeature.AUTO_DETECT_FIELDS);
+
+        mapper.setVisibility(
+            mapper.getSerializationConfig().
+                getDefaultVisibilityChecker().
+                withFieldVisibility(JsonAutoDetect.Visibility.ANY).
+                withGetterVisibility(JsonAutoDetect.Visibility.NONE).
+                withIsGetterVisibility(JsonAutoDetect.Visibility.NONE));
     }
 
     public static ObjectMapper getObjectMapper() {
