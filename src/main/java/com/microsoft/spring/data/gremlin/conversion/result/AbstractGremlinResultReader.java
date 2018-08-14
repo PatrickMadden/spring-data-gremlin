@@ -21,10 +21,10 @@ public abstract class AbstractGremlinResultReader {
     /**
      * properties's organization is a little complicated.
      *
-     * properties is LinkedHashMap<K, V>
+     * properties is HashMap<K, V>
      * K is String
      * V is ArrayList<T>
-     * T is LinkedHashMap<String, String>
+     * T is HashMap<String, String>
      */
     private Object readProperty(@NonNull Object value) {
         Assert.isInstanceOf(ArrayList.class, value, "should be instance of ArrayList");
