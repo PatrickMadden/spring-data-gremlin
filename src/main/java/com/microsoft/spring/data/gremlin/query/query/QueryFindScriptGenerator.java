@@ -148,7 +148,7 @@ public class QueryFindScriptGenerator implements QueryScriptGenerator {
             throw new UnsupportedOperationException("Cannot generate script from graph entity");
         }
 
-        scriptList.add(String.format(GREMLIN_PRIMITIVE_HAS_STRING, PROPERTY_LABEL, this.information.getEntityLabel()));
+        scriptList.add(String.format(GREMLIN_PRIMITIVE_HAS_KEYWORD, PROPERTY_LABEL, this.information.getEntityLabel()));
         scriptList.add(this.generateScriptTraversal(criteria));
 
         return scriptList;
