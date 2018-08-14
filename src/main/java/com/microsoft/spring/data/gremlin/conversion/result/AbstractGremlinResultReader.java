@@ -12,7 +12,7 @@ import org.springframework.lang.NonNull;
 import org.springframework.util.Assert;
 
 import java.util.ArrayList;
-import java.util.LinkedHashMap;
+import java.util.HashMap;
 import java.util.Map;
 
 @NoArgsConstructor
@@ -29,8 +29,8 @@ public abstract class AbstractGremlinResultReader {
     private Object readProperty(@NonNull Object value) {
         Assert.isInstanceOf(ArrayList.class, value, "should be instance of ArrayList");
 
-        @SuppressWarnings("unchecked") final ArrayList<LinkedHashMap<String, String>> mapList
-                = (ArrayList<LinkedHashMap<String, String>>) value;
+        @SuppressWarnings("unchecked") final ArrayList<HashMap<String, String>> mapList
+                = (ArrayList<HashMap<String, String>>) value;
 
         Assert.isTrue(mapList.size() == 1, "should be only 1 element in ArrayList");
 
