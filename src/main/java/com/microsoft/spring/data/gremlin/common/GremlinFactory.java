@@ -69,6 +69,7 @@ public class GremlinFactory {
                     .credentials(this.username, this.password)
                     .enableSsl(this.enableSsl)
                     .port(port)
+                    .maxContentLength(262144)
                     .create();
         } catch (IllegalArgumentException e) {
             throw new GremlinIllegalConfigurationException("Invalid configuration of Gremlin", e);
