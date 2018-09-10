@@ -16,17 +16,17 @@ public class AnnotationVertexUnitTest {
 
     @Test
     public void testAnnotationVertexDefaultLabel() {
-        Assert.assertNotNull(new GremlinEntityInformation<>(Library.class).getEntityLabel());
-        Assert.assertTrue(new GremlinEntityInformation<>(Library.class).isEntityVertex());
-        Assert.assertEquals(new GremlinEntityInformation<>(Library.class).getEntityLabel(),
+        Assert.assertNotNull(GremlinEntityInformation.get(Library.class).getEntityLabel());
+        Assert.assertTrue(GremlinEntityInformation.get(Library.class).isEntityVertex());
+        Assert.assertEquals(GremlinEntityInformation.get(Library.class).getEntityLabel(),
                 Library.class.getSimpleName());
     }
 
     @Test
     public void testAnnotationVertexSpecifiedLabel() {
-        Assert.assertNotNull(new GremlinEntityInformation<>(Person.class).getEntityLabel());
-        Assert.assertTrue(new GremlinEntityInformation<>(Person.class).isEntityVertex());
-        Assert.assertEquals(new GremlinEntityInformation<>(Person.class).getEntityLabel(),
+        Assert.assertNotNull(GremlinEntityInformation.get(Person.class).getEntityLabel());
+        Assert.assertTrue(GremlinEntityInformation.get(Person.class).isEntityVertex());
+        Assert.assertEquals(GremlinEntityInformation.get(Person.class).getEntityLabel(),
                 TestConstants.VERTEX_PERSON_LABEL);
     }
 }

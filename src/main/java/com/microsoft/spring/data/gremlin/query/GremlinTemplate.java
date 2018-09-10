@@ -119,7 +119,7 @@ public class GremlinTemplate implements GremlinOperations, ApplicationContextAwa
     }
 
     public <T> void deleteAll(@NonNull Class<T> domainClass) {
-        @SuppressWarnings("unchecked") final GremlinEntityInformation info = new GremlinEntityInformation(domainClass);
+        @SuppressWarnings("unchecked") final GremlinEntityInformation info = GremlinEntityInformation.get(domainClass);
         final GremlinSource source = info.getGremlinSource();
         final List<String> queryList = source.getGremlinScriptLiteral().generateDeleteAllByClassScript(source);
 
@@ -129,7 +129,7 @@ public class GremlinTemplate implements GremlinOperations, ApplicationContextAwa
     @Override
     public <T> T insert(@NonNull T object) {
         final Class domainClass = object.getClass();
-        @SuppressWarnings("unchecked") final GremlinEntityInformation info = new GremlinEntityInformation(domainClass);
+        @SuppressWarnings("unchecked") final GremlinEntityInformation info = GremlinEntityInformation.get(domainClass);
         final GremlinSource source = info.getGremlinSource();
 
         this.mappingConverter.write(object, source);
@@ -143,7 +143,7 @@ public class GremlinTemplate implements GremlinOperations, ApplicationContextAwa
 
     @Override
     public <T> T findVertexById(@NonNull Object id, @NonNull Class<T> domainClass) {
-        @SuppressWarnings("unchecked") final GremlinEntityInformation info = new GremlinEntityInformation(domainClass);
+        @SuppressWarnings("unchecked") final GremlinEntityInformation info = GremlinEntityInformation.get(domainClass);
 
         if (!info.isEntityVertex()) {
             throw new GremlinUnexpectedEntityTypeException("should be vertex domain for findEdge");
@@ -197,7 +197,7 @@ public class GremlinTemplate implements GremlinOperations, ApplicationContextAwa
 
     @Override
     public <T> T findEdgeById(@NonNull Object id, @NonNull Class<T> domainClass) {
-        @SuppressWarnings("unchecked") final GremlinEntityInformation info = new GremlinEntityInformation(domainClass);
+        @SuppressWarnings("unchecked") final GremlinEntityInformation info = GremlinEntityInformation.get(domainClass);
 
         if (!info.isEntityEdge()) {
             throw new GremlinUnexpectedEntityTypeException("should be edge domain for findEdge");
@@ -208,7 +208,7 @@ public class GremlinTemplate implements GremlinOperations, ApplicationContextAwa
 
     @Override
     public <T> T findById(@NonNull Object id, @NonNull Class<T> domainClass) {
-        @SuppressWarnings("unchecked") final GremlinEntityInformation info = new GremlinEntityInformation(domainClass);
+        @SuppressWarnings("unchecked") final GremlinEntityInformation info = GremlinEntityInformation.get(domainClass);
         final GremlinSource source = info.getGremlinSource();
 
         if (info.isEntityGraph()) {
@@ -247,7 +247,7 @@ public class GremlinTemplate implements GremlinOperations, ApplicationContextAwa
     @Override
     public <T> T update(@NonNull T object) {
         @SuppressWarnings("unchecked") final Class<T> domainClass = (Class<T>) object.getClass();
-        @SuppressWarnings("unchecked") final GremlinEntityInformation info = new GremlinEntityInformation(domainClass);
+        @SuppressWarnings("unchecked") final GremlinEntityInformation info = GremlinEntityInformation.get(domainClass);
         @SuppressWarnings("unchecked") final Object id = info.getId(object);
 
         if (!info.isEntityGraph() && this.findById(id, domainClass) == null) {
@@ -260,7 +260,7 @@ public class GremlinTemplate implements GremlinOperations, ApplicationContextAwa
     @Override
     public <T> T save(@NonNull T object) {
         @SuppressWarnings("unchecked") final Class<T> domainClass = (Class<T>) object.getClass();
-        @SuppressWarnings("unchecked") final GremlinEntityInformation info = new GremlinEntityInformation(domainClass);
+        @SuppressWarnings("unchecked") final GremlinEntityInformation info = GremlinEntityInformation.get(domainClass);
         @SuppressWarnings("unchecked") final Object id = info.getId(object);
 
         if (info.isEntityGraph() && this.isEmptyGraph(object)) {
@@ -274,7 +274,7 @@ public class GremlinTemplate implements GremlinOperations, ApplicationContextAwa
 
     @Override
     public <T> List<T> findAll(@NonNull Class<T> domainClass) {
-        @SuppressWarnings("unchecked") final GremlinEntityInformation info = new GremlinEntityInformation(domainClass);
+        @SuppressWarnings("unchecked") final GremlinEntityInformation info = GremlinEntityInformation.get(domainClass);
         final GremlinSource source = info.getGremlinSource();
 
         if (info.isEntityGraph()) {
@@ -293,7 +293,7 @@ public class GremlinTemplate implements GremlinOperations, ApplicationContextAwa
 
     @Override
     public <T> void deleteById(@NonNull Object id, @NonNull Class<T> domainClass) {
-        @SuppressWarnings("unchecked") final GremlinEntityInformation info = new GremlinEntityInformation(domainClass);
+        @SuppressWarnings("unchecked") final GremlinEntityInformation info = GremlinEntityInformation.get(domainClass);
         final GremlinSource source = info.getGremlinSource();
 
         source.setId(id.toString());
@@ -306,7 +306,7 @@ public class GremlinTemplate implements GremlinOperations, ApplicationContextAwa
     @Override
     public <T> boolean isEmptyGraph(@NonNull T object) {
         @SuppressWarnings("unchecked") final Class<T> domainClass = (Class<T>) object.getClass();
-        @SuppressWarnings("unchecked") final GremlinEntityInformation info = new GremlinEntityInformation(domainClass);
+        @SuppressWarnings("unchecked") final GremlinEntityInformation info = GremlinEntityInformation.get(domainClass);
 
         if (!info.isEntityGraph()) {
             throw new GremlinQueryException("only graph domain is allowed.");
@@ -363,7 +363,7 @@ public class GremlinTemplate implements GremlinOperations, ApplicationContextAwa
 
     @Override
     public <T> List<T> find(@NonNull GremlinQuery query, @NonNull Class<T> domainClass) {
-        @SuppressWarnings("unchecked") final GremlinEntityInformation info = new GremlinEntityInformation(domainClass);
+        @SuppressWarnings("unchecked") final GremlinEntityInformation info = GremlinEntityInformation.get(domainClass);
         final GremlinSource source = info.getGremlinSource();
 
         query.setScriptGenerator(new QueryFindScriptGenerator());

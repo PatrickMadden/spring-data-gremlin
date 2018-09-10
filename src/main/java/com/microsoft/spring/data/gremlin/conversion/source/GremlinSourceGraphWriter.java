@@ -31,7 +31,7 @@ public class GremlinSourceGraphWriter implements GremlinSourceWriter {
         Assert.isInstanceOf(GremlinSourceGraph.class, sourceGraph, "should be instance of GremlinSourceGraph ");
 
         for (final Object object : objectList) {
-            final GremlinSource source = new GremlinEntityInformation<>(object.getClass()).getGremlinSource();
+            final GremlinSource source = GremlinEntityInformation.get(object.getClass()).getGremlinSource();
 
             source.doGremlinSourceWrite(object, mappingConverter);
             sourceGraph.addGremlinSource(source);

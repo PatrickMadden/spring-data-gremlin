@@ -19,6 +19,9 @@ import org.springframework.lang.Nullable;
 import org.springframework.util.ReflectionUtils;
 
 import java.lang.reflect.Field;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+
 
 public class GremlinEntityInformation<T, ID> extends AbstractEntityInformation<T, ID> {
 
@@ -27,7 +30,25 @@ public class GremlinEntityInformation<T, ID> extends AbstractEntityInformation<T
     private GremlinEntityType entityType;
     private GremlinSource gremlinSource;
 
-    public GremlinEntityInformation(@NonNull Class<T> domainClass) {
+    private static Map<Class, GremlinEntityInformation> entityInformationMap =
+        new ConcurrentHashMap<>();
+
+    public static GremlinEntityInformation get(@NonNull Class domainClass)
+    {
+        GremlinEntityInformation gremlinEntityInformation =
+            entityInformationMap.get(domainClass);
+
+        if (gremlinEntityInformation == null)
+        {
+            gremlinEntityInformation = new GremlinEntityInformation(domainClass);
+
+            entityInformationMap.put(domainClass, gremlinEntityInformation);
+        }
+
+        return gremlinEntityInformation;
+    }
+
+    protected GremlinEntityInformation(@NonNull Class<T> domainClass) {
         super(domainClass);
 
         this.id = this.getIdField(domainClass);

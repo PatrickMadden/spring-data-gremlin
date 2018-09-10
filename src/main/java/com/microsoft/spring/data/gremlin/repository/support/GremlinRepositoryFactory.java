@@ -49,7 +49,7 @@ public class GremlinRepositoryFactory extends RepositoryFactorySupport {
 
     @Override
     public <T, ID> EntityInformation<T, ID> getEntityInformation(Class<T> domainClass) {
-        return new GremlinEntityInformation<>(domainClass);
+        return GremlinEntityInformation.get(domainClass);
     }
 
     @Override

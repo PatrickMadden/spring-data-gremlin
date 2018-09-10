@@ -158,7 +158,7 @@ public class QueryFindScriptGenerator implements QueryScriptGenerator {
     @SuppressWarnings("unchecked")
     public <T> List<String> generate(@NonNull GremlinQuery query, @NonNull Class<T> domainClass) {
 
-        this.setInformation(new GremlinEntityInformation(domainClass));
+        this.setInformation(GremlinEntityInformation.get(domainClass));
 
         final List<String> scriptList = new ArrayList<>(this.generateScript(query));
 

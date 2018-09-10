@@ -46,7 +46,7 @@ public class GremlinScriptLiteralEdgeUnitTest {
                 new Project("321", "ms-project", null) // to
         );
         @SuppressWarnings("unchecked") final GremlinEntityInformation info =
-                new GremlinEntityInformation(Relationship.class);
+                GremlinEntityInformation.get(Relationship.class);
         gremlinSource = info.getGremlinSource();
         this.converter.write(relationship, gremlinSource);
     }

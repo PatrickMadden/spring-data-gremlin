@@ -40,7 +40,7 @@ public class GremlinScriptLiteralVertexUnitTest {
         this.converter = new MappingGremlinConverter(this.mappingContext);
 
         final Person person = new Person("123", "bill");
-        @SuppressWarnings("unchecked") final GremlinEntityInformation info = new GremlinEntityInformation(Person.class);
+        @SuppressWarnings("unchecked") final GremlinEntityInformation info = GremlinEntityInformation.get(Person.class);
         gremlinSource = info.getGremlinSource();
         this.converter.write(person, gremlinSource);
     }

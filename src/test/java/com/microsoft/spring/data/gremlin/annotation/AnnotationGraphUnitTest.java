@@ -15,13 +15,13 @@ public class AnnotationGraphUnitTest {
 
     @Test
     public void testAnnotationGraphDefaultCollection() {
-        Assert.assertNull(new GremlinEntityInformation<>(Network.class).getEntityLabel());
-        Assert.assertTrue(new GremlinEntityInformation<>(Network.class).isEntityGraph());
+        Assert.assertNull(GremlinEntityInformation.get(Network.class).getEntityLabel());
+        Assert.assertTrue(GremlinEntityInformation.get(Network.class).isEntityGraph());
     }
 
     @Test
     public void testAnnotationGraphSpecifiedCollection() {
-        Assert.assertNull(new GremlinEntityInformation<>(Roadmap.class).getEntityLabel());
-        Assert.assertTrue(new GremlinEntityInformation<>(Roadmap.class).isEntityGraph());
+        Assert.assertNull(GremlinEntityInformation.get(Roadmap.class).getEntityLabel());
+        Assert.assertTrue(GremlinEntityInformation.get(Roadmap.class).isEntityGraph());
     }
 }

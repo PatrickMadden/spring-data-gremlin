@@ -24,14 +24,14 @@ public class GremlinSourceSimpleFactoryUnitTest {
 
     @Test(expected = GremlinUnexpectedEntityTypeException.class)
     public void testUnexpectedGremlinEntityType() {
-        final GremlinEntityInformation<Person, String> info = new GremlinEntityInformation<>(Person.class);
+        final GremlinEntityInformation<Person, String> info = GremlinEntityInformation.get(Person.class);
         GremlinSourceSimpleFactory.createGremlinSource(info.getIdField(), info.getEntityLabel(),
                 GremlinEntityType.UNKNOWN);
     }
 
     @Test
     public void testCreateGremlinSourceVertex() {
-        final GremlinEntityInformation<Person, String> info = new GremlinEntityInformation<>(Person.class);
+        final GremlinEntityInformation<Person, String> info = GremlinEntityInformation.get(Person.class);
         final GremlinSource source = GremlinSourceSimpleFactory.createGremlinSource(info.getIdField(),
                 info.getEntityLabel(), info.getEntityType());
 
@@ -41,7 +41,7 @@ public class GremlinSourceSimpleFactoryUnitTest {
 
     @Test
     public void testCreateGremlinSourceEdge() {
-        final GremlinEntityInformation<Relationship, String> info = new GremlinEntityInformation<>(Relationship.class);
+        final GremlinEntityInformation<Relationship, String> info = GremlinEntityInformation.get(Relationship.class);
         final GremlinSource source = GremlinSourceSimpleFactory.createGremlinSource(info.getIdField(),
                 info.getEntityLabel(), info.getEntityType());
 
@@ -51,7 +51,7 @@ public class GremlinSourceSimpleFactoryUnitTest {
 
     @Test
     public void testCreateGremlinSourceGraph() {
-        final GremlinEntityInformation<Network, String> info = new GremlinEntityInformation<>(Network.class);
+        final GremlinEntityInformation<Network, String> info = GremlinEntityInformation.get(Network.class);
         final GremlinSource source = GremlinSourceSimpleFactory.createGremlinSource(info.getIdField(),
                 info.getEntityLabel(), info.getEntityType());
 

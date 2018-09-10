@@ -15,17 +15,17 @@ public class AnnotationEdgeUnitTest {
 
     @Test
     public void testAnnotationEdgeDefaultLabel() {
-        Assert.assertTrue(new GremlinEntityInformation<>(Dependency.class).isEntityEdge());
-        Assert.assertNotNull(new GremlinEntityInformation<>(Dependency.class).getEntityLabel());
-        Assert.assertEquals(new GremlinEntityInformation<>(Dependency.class).getEntityLabel(),
+        Assert.assertTrue(GremlinEntityInformation.get(Dependency.class).isEntityEdge());
+        Assert.assertNotNull(GremlinEntityInformation.get(Dependency.class).getEntityLabel());
+        Assert.assertEquals(GremlinEntityInformation.get(Dependency.class).getEntityLabel(),
                 Dependency.class.getSimpleName());
     }
 
     @Test
     public void testAnnotationEdgeSpecifiedLabel() {
-        Assert.assertNotNull(new GremlinEntityInformation<>(Relationship.class).getEntityLabel());
-        Assert.assertTrue(new GremlinEntityInformation<>(Relationship.class).isEntityEdge());
-        Assert.assertEquals(new GremlinEntityInformation<>(Relationship.class).getEntityLabel(),
+        Assert.assertNotNull(GremlinEntityInformation.get(Relationship.class).getEntityLabel());
+        Assert.assertTrue(GremlinEntityInformation.get(Relationship.class).isEntityEdge());
+        Assert.assertEquals(GremlinEntityInformation.get(Relationship.class).getEntityLabel(),
                 TestConstants.EDGE_RELATIONSHIP_LABEL);
     }
 }
