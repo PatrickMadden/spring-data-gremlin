@@ -65,7 +65,7 @@ public class GremlinFactory {
         try {
             port = Integer.parseInt(this.port);
             cluster = Cluster.build(this.endpoint)
-                    .serializer(Serializers.DEFAULT_RESULT_SERIALIZER)
+                    .serializer(Serializers.GRAPHSON_V1D0)
                     .credentials(this.username, this.password)
                     .enableSsl(this.enableSsl)
                     .port(port)
