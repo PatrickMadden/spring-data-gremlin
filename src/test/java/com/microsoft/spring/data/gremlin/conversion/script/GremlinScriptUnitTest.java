@@ -35,10 +35,11 @@ public class GremlinScriptUnitTest {
     public void testGeneratePropertyException() {
         final Map<String, Object> properties = new HashMap<>();
         final GremlinSource source = new GremlinSourceVertex();
+        final GremlinScriptLiteralVertex scriptLiteralVertex = new GremlinScriptLiteralVertex();
 
         properties.put("person", source);
 
-        GremlinScriptLiteralVertex.generateProperties(properties);
+        scriptLiteralVertex.generateProperties(properties);
     }
 
     @Test(expected = GremlinUnexpectedEntityTypeException.class)

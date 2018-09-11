@@ -123,7 +123,7 @@ public class GremlinScriptLiteralEdge extends AbstractGremlinScriptLiteral imple
         scriptList.add(Constants.GREMLIN_PRIMITIVE_GRAPH);
         scriptList.add(String.format(Constants.GREMLIN_PRIMITIVE_EDGE, id));
 
-        scriptList.addAll(generateProperties(properties));
+        scriptList.addAll(generateUpdateProperties(properties));
 
         final String query = String.join(Constants.GREMLIN_PRIMITIVE_INVOKE, scriptList);
 
@@ -173,6 +173,21 @@ public class GremlinScriptLiteralEdge extends AbstractGremlinScriptLiteral imple
         }
 
         return Collections.singletonList(Constants.GREMLIN_SCRIPT_EDGE_ALL);
+    }
+
+
+    /**
+     * Edges properties do not support single cardinality. Use default properties instead of update properties.
+     * @param properties The properties of interest.
+     * @return The list of property literals.
+     */
+    @Override
+    public List<String> generateUpdateProperties(@NonNull final Map<String, Object> properties) {
+        final List<String> scripts = new ArrayList<>();
+
+        properties.forEach((name, value) -> scripts.add(generateProperty(name, value)));
+
+        return scripts;
     }
 }
 

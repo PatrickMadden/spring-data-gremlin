@@ -112,7 +112,7 @@ public class GremlinScriptLiteralVertex extends AbstractGremlinScriptLiteral imp
         scriptList.add(Constants.GREMLIN_PRIMITIVE_GRAPH);
         scriptList.add(String.format(Constants.GREMLIN_PRIMITIVE_VERTEX, id));
 
-        scriptList.addAll(generateProperties(properties));
+        scriptList.addAll(generateUpdateProperties(properties));
 
         final String query = String.join(Constants.GREMLIN_PRIMITIVE_INVOKE, scriptList);
 
