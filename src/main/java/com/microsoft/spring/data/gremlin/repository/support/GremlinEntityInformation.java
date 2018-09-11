@@ -33,13 +33,11 @@ public class GremlinEntityInformation<T, ID> extends AbstractEntityInformation<T
     private static Map<Class, GremlinEntityInformation> entityInformationMap =
         new ConcurrentHashMap<>();
 
-    public static GremlinEntityInformation get(@NonNull Class domainClass)
-    {
+    public static GremlinEntityInformation get(@NonNull Class domainClass) {
         GremlinEntityInformation gremlinEntityInformation =
             entityInformationMap.get(domainClass);
 
-        if (gremlinEntityInformation == null)
-        {
+        if (gremlinEntityInformation == null) {
             gremlinEntityInformation = new GremlinEntityInformation(domainClass);
 
             entityInformationMap.put(domainClass, gremlinEntityInformation);
