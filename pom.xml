@@ -42,7 +42,7 @@
         <spring.springframework.version>5.0.1.RELEASE</spring.springframework.version>
         <spring.boot.version>2.0.0.RELEASE</spring.boot.version>
 
-        <org.apache.tinkerpop.gremlin.driver.version>3.2.4</org.apache.tinkerpop.gremlin.driver.version>
+        <org.apache.tinkerpop.gremlin.driver.version>3.3.2</org.apache.tinkerpop.gremlin.driver.version>
         <org.projectlombok.version>1.16.18</org.projectlombok.version>
         <mockito.core.version>2.8.9</mockito.core.version>
         <azure.applicationinsights.version>2.0.1</azure.applicationinsights.version>
