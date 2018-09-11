@@ -42,7 +42,7 @@ public class GremlinSourceGraphWriter implements GremlinSourceWriter {
     public void write(@NonNull Object domain, @NonNull MappingGremlinConverter converter,
                       @NonNull GremlinSource source) {
         if (!(source instanceof GremlinSourceGraph)) {
-            throw new GremlinUnexpectedSourceTypeException("should be the instance of GremlinSourceEdge");
+            throw new GremlinUnexpectedSourceTypeException("should be the instance of GremlinSourceGraph");
         }
 
         final GremlinSourceGraph sourceGraph = (GremlinSourceGraph) source;
