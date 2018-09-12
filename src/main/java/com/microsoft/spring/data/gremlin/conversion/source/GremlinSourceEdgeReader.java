@@ -24,7 +24,7 @@ import java.lang.reflect.Field;
 import static com.microsoft.spring.data.gremlin.common.Constants.PROPERTY_ID;
 
 @NoArgsConstructor
-public class GremlinSourceEdgeReader implements GremlinSourceReader {
+public class GremlinSourceEdgeReader extends AbstractGremlinSourceReader implements GremlinSourceReader {
 
     @Override
     public <T extends Object> T read(@NonNull Class<T> type, @NonNull MappingGremlinConverter converter,
@@ -57,7 +57,9 @@ public class GremlinSourceEdgeReader implements GremlinSourceReader {
                    continue;
                }
 
-               accessor.setProperty(property, source.getProperties().get(field.getName()));
+               final Object value = super.readProperty(property,
+                   source.getProperties().get(field.getName()));
+               accessor.setProperty(property, value);
            }
        }
 
