@@ -44,9 +44,9 @@ public class GremlinSourceVertexReader extends AbstractGremlinSourceReader imple
                     field.getAnnotation(Id.class) != null) {
                     accessor.setProperty(property, source.getId());
                 } else {
-                    final Object value = super.readProperty(property,
-                        source.getProperties().get(field.getName()));
-                    accessor.setProperty(property, value);
+                    final Object sourceValue = source.getProperties().get(field.getName());
+                    accessor.setProperty(property,
+                        sourceValue != null ? super.readProperty(property, sourceValue) : null);
                 }
             }
         }

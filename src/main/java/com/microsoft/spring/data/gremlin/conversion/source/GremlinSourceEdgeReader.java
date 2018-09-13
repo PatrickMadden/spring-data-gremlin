@@ -46,7 +46,6 @@ public class GremlinSourceEdgeReader extends AbstractGremlinSourceReader impleme
                if (field.getName().equals(PROPERTY_ID) ||
                    field.getAnnotation(Id.class) != null) {
                    accessor.setProperty(property, source.getId());
-                   continue;
                } else if (field.getAnnotation(EdgeFrom.class) != null ||
                    field.getAnnotation(EdgeTo.class) != null) {
                    // We cannot do that here as the gremlin will not tell more information
@@ -54,12 +53,12 @@ public class GremlinSourceEdgeReader extends AbstractGremlinSourceReader impleme
                    // Id of vertex from/to. And then we will do extra 2 query to obtain
                    // the 2 vertex and complete the edge.
                    // That work will be wrapped in GremlinTemplate insert, and skip the property here.
-                   continue;
+               } else {
+                   final Object sourceValue = source.getProperties().get(field.getName());
+                   accessor.setProperty(property,
+                       sourceValue != null ? super.readProperty(property, sourceValue) :
+                           null);
                }
-
-               final Object value = super.readProperty(property,
-                   source.getProperties().get(field.getName()));
-               accessor.setProperty(property, value);
            }
        }
 
