@@ -80,7 +80,7 @@ public class GremlinTemplate implements GremlinOperations, ApplicationContextAwa
     }
 
     @NonNull
-    private List<Result> executeQuery(@NonNull List<String> queryList) {
+    protected List<Result> executeQuery(@NonNull List<String> queryList) {
         final List<Result> results = new ArrayList<>();
 
         try {
@@ -88,6 +88,21 @@ public class GremlinTemplate implements GremlinOperations, ApplicationContextAwa
             return results;
         } catch (CompletionException e) {
             throw new GremlinQueryException(String.format("unable to complete execute %s from gremlin", queryList), e);
+        }
+    }
+
+
+    /**
+     * This method execuates a query expected to return a long value.
+     * @param query The query such as a count query.
+     * @return The long value of the {@link Result} returned from the query.
+     */
+    public long executeLongQuery(@NonNull String query) {
+        try {
+            final Result result = this.getGremlinClient().submit(query).one();
+            return result.getLong();
+        } catch (CompletionException e) {
+            throw new GremlinQueryException(String.format("unable to complete execute %s from gremlin", query), e);
         }
     }
 
@@ -152,7 +167,7 @@ public class GremlinTemplate implements GremlinOperations, ApplicationContextAwa
         return this.findById(id, domainClass);
     }
 
-    private Object getEdgeAnnotatedFieldValue(@NonNull Field field, @NonNull String vertexId) {
+    protected Object getEdgeAnnotatedFieldValue(@NonNull Field field, @NonNull String vertexId) {
         if (field.getType() == String.class) {
             return vertexId;
         } else if (field.getType().isPrimitive()) {
@@ -163,7 +178,7 @@ public class GremlinTemplate implements GremlinOperations, ApplicationContextAwa
     }
 
     @NonNull
-    private Field getEdgeAnnotatedField(@NonNull Class<?> domainClass,
+    protected Field getEdgeAnnotatedField(@NonNull Class<?> domainClass,
                                         @NonNull Class<? extends Annotation> annotationClass) {
         final List<Field> fields = FieldUtils.getFieldsListWithAnnotation(domainClass, annotationClass);
 
@@ -178,7 +193,7 @@ public class GremlinTemplate implements GremlinOperations, ApplicationContextAwa
      * Find Edge need another two query to obtain edgeFrom and edgeTo.
      * This function will do that and make edge domain completion.
      */
-    private <T> void completeEdge(@NonNull T domain, @NonNull GremlinSourceEdge source) {
+    protected <T> void completeEdge(@NonNull T domain, @NonNull GremlinSourceEdge source) {
         final ConvertingPropertyAccessor accessor = this.mappingConverter.getPropertyAccessor(domain);
         final GremlinPersistentEntity persistentEntity = this.mappingConverter.getPersistentEntity(domain.getClass());
 
@@ -232,7 +247,7 @@ public class GremlinTemplate implements GremlinOperations, ApplicationContextAwa
         return this.recoverDomain(source, results.get(0), domainClass, info.isEntityEdge());
     }
 
-    private <T> T updateInternal(@NonNull T object, @NonNull GremlinEntityInformation information) {
+    protected <T> T updateInternal(@NonNull T object, @NonNull GremlinEntityInformation information) {
         final GremlinSource source = information.getGremlinSource();
 
         this.mappingConverter.write(object, source);
@@ -323,20 +338,43 @@ public class GremlinTemplate implements GremlinOperations, ApplicationContextAwa
     @Override
     public long vertexCount() {
         final GremlinScriptLiteral script = new GremlinScriptLiteralVertex();
-        final List<String> queryList = script.generateCountScript(new GremlinSourceVertex());
-        final List<Result> results = this.executeQuery(queryList);
+        final String query = script.generateCountScript(new GremlinSourceVertex());
 
-        return results.size();
+        return this.executeLongQuery(query);
     }
 
     @Override
     public long edgeCount() {
         final GremlinScriptLiteral script = new GremlinScriptLiteralEdge();
-        final List<String> queryList = script.generateCountScript(new GremlinSourceEdge());
-        final List<Result> results = this.executeQuery(queryList);
+        final String query = script.generateCountScript(new GremlinSourceEdge());
 
-        return results.size();
+        return this.executeLongQuery(query);
     }
+
+
+    @Override
+    public <T> long vertexCount(Class<T> domainClass) {
+        final GremlinEntityInformation info = GremlinEntityInformation.get(domainClass);
+        final GremlinSource source = info.getGremlinSource();
+
+        final GremlinScriptLiteralVertex script = new GremlinScriptLiteralVertex();
+        final String query = script.generateCountLabelScript(source);
+
+        return this.executeLongQuery(query);
+    }
+
+
+    @Override
+    public <T> long edgeCount(Class<T> domainClass) {
+        final GremlinEntityInformation info = GremlinEntityInformation.get(domainClass);
+        final GremlinSource source = info.getGremlinSource();
+
+        final GremlinScriptLiteralEdge script = new GremlinScriptLiteralEdge();
+        final String query = script.generateCountLabelScript(source);
+
+        return this.executeLongQuery(query);
+    }
+
 
     private <T> T recoverDomain(@NonNull GremlinSource source, @NonNull Result result,
                                 @NonNull Class<T> domainClass, boolean isEntityEdge) {

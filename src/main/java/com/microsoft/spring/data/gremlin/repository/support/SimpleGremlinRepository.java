@@ -86,9 +86,21 @@ public class SimpleGremlinRepository<T, ID extends Serializable> implements Grem
         return this.operations.vertexCount();
     }
 
+
+    @Override
+    public long vertexCount(Class<T> domainClass) {
+        return this.operations.vertexCount(domainClass);
+    }
+
+
     @Override
     public long edgeCount() {
         return this.operations.edgeCount();
+    }
+
+    @Override
+    public long edgeCount(Class<T> domainClass) {
+        return this.operations.edgeCount(domainClass);
     }
 
     /**

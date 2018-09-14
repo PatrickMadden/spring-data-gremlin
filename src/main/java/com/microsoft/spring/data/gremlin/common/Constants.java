@@ -35,6 +35,7 @@ public class Constants {
     public static final String GREMLIN_PRIMITIVE_GRAPH = "g";
     public static final String GREMLIN_PRIMITIVE_INVOKE = ".";
     public static final String GREMLIN_PRIMITIVE_DROP = "drop()";
+    public static final String GREMLIN_PRIMITIVE_COUNT = "count()";
 
     public static final String GREMLIN_PRIMITIVE_EDGE = "E('%s')";
     public static final String GREMLIN_PRIMITIVE_EDGE_ALL = "E()";

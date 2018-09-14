@@ -52,5 +52,5 @@ public interface GremlinScriptLiteral {
     /**
      * Generate the Count query from Source (Vertex, Edge)
      */
-    List<String> generateCountScript(GremlinSource source);
+    String generateCountScript(GremlinSource source);
 }

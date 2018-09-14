@@ -47,8 +47,8 @@ public class GremlinScriptLiteralVertexUnitTest {
 
     @Test
     public void testGenerateCountScript() {
-        final List<String> queryList = new GremlinScriptLiteralVertex().generateCountScript(gremlinSource);
-        assertEquals(queryList.get(0), "g.V()");
+        final String query = new GremlinScriptLiteralVertex().generateCountScript(gremlinSource);
+        assertEquals(query, "g.V().count()");
     }
 
     @Test

@@ -5,10 +5,13 @@
  */
 package com.microsoft.spring.data.gremlin.conversion.script;
 
+import com.microsoft.spring.data.gremlin.common.Constants;
 import com.microsoft.spring.data.gremlin.common.GremlinUtils;
+import com.microsoft.spring.data.gremlin.conversion.source.GremlinSource;
 import com.microsoft.spring.data.gremlin.exception.GremlinUnexpectedEntityTypeException;
 import org.apache.tinkerpop.shaded.jackson.core.JsonProcessingException;
 import org.springframework.lang.NonNull;
+import org.springframework.util.Assert;
 
 import java.util.ArrayList;
 import java.util.Date;

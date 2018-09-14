@@ -41,8 +41,10 @@ public interface GremlinOperations {
     <T> List<T> findAll(Class<T> domainClass);
 
     long vertexCount();
+    <T> long vertexCount(Class<T> domainClass);
 
     long edgeCount();
+    <T> long edgeCount(Class<T> domainClass);
 
     <T> List<T> find(GremlinQuery query, Class<T> domainClass);
 

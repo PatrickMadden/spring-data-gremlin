@@ -20,7 +20,9 @@ import java.util.Map;
 
 @NoArgsConstructor
 public class GremlinScriptLiteralVertex extends AbstractGremlinScriptLiteral implements GremlinScriptLiteral {
-
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public List<String> generateInsertScript(@NonNull GremlinSource source) {
         if (!(source instanceof GremlinSourceVertex)) {
@@ -47,6 +49,9 @@ public class GremlinScriptLiteralVertex extends AbstractGremlinScriptLiteral imp
         return Collections.singletonList(query);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public List<String> generateDeleteAllScript(@NonNull GremlinSource source) {
         if (!(source instanceof GremlinSourceVertex)) {
@@ -77,6 +82,9 @@ public class GremlinScriptLiteralVertex extends AbstractGremlinScriptLiteral imp
         return Collections.singletonList(query);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public List<String> generateFindByIdScript(@NonNull GremlinSource source) {
         if (!(source instanceof GremlinSourceVertex)) {
@@ -96,6 +104,9 @@ public class GremlinScriptLiteralVertex extends AbstractGremlinScriptLiteral imp
         return Collections.singletonList(query);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public List<String> generateUpdateScript(@NonNull GremlinSource source) {
         if (!(source instanceof GremlinSourceVertex)) {
@@ -119,6 +130,9 @@ public class GremlinScriptLiteralVertex extends AbstractGremlinScriptLiteral imp
         return Collections.singletonList(query);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public List<String> generateFindAllScript(@NonNull GremlinSource source) {
         final String label = source.getLabel();
@@ -135,6 +149,9 @@ public class GremlinScriptLiteralVertex extends AbstractGremlinScriptLiteral imp
         return Collections.singletonList(query);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public List<String> generateDeleteByIdScript(@NonNull GremlinSource source) {
         if (!(source instanceof GremlinSourceVertex)) {
@@ -155,13 +172,44 @@ public class GremlinScriptLiteralVertex extends AbstractGremlinScriptLiteral imp
         return Collections.singletonList(query);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
-    public List<String> generateCountScript(@NonNull GremlinSource source) {
+    public String generateCountScript(@NonNull GremlinSource source) {
         if (!(source instanceof GremlinSourceVertex)) {
             throw new GremlinUnexpectedSourceTypeException("should be the instance of GremlinSourceVertex");
         }
 
-        return Collections.singletonList(Constants.GREMLIN_SCRIPT_VERTEX_ALL);
+        return String.join(Constants.GREMLIN_PRIMITIVE_INVOKE,
+            Constants.GREMLIN_SCRIPT_VERTEX_ALL,
+            Constants.GREMLIN_PRIMITIVE_COUNT);
+    }
+
+
+    /**
+     * Generate the Count query for a particular vertex label.
+     * @param source The {@link GremlinSource} instane.
+     * @return The query.
+     */
+    public String generateCountLabelScript(GremlinSource source) {
+        if (!(source instanceof GremlinSourceVertex)) {
+            throw new GremlinUnexpectedSourceTypeException("should be the instance of GremlinSourceVertex");
+        }
+
+        final String label = source.getLabel();
+        final List<String> scriptList = new ArrayList<>();
+
+        Assert.notNull(label, "label should not be null");
+
+        scriptList.add(Constants.GREMLIN_PRIMITIVE_GRAPH);
+        scriptList.add(Constants.GREMLIN_PRIMITIVE_VERTEX_ALL);
+        scriptList.add(String.format(Constants.GREMLIN_PRIMITIVE_HAS_KEYWORD, Constants.PROPERTY_LABEL, label));
+        scriptList.add(Constants.GREMLIN_PRIMITIVE_COUNT);
+
+        final String query = String.join(Constants.GREMLIN_PRIMITIVE_INVOKE, scriptList);
+
+        return query;
     }
 }
 

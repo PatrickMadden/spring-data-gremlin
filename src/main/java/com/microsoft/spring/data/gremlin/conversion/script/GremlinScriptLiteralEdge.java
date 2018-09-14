@@ -167,12 +167,40 @@ public class GremlinScriptLiteralEdge extends AbstractGremlinScriptLiteral imple
     }
 
     @Override
-    public List<String> generateCountScript(@NonNull GremlinSource source) {
+    public String generateCountScript(@NonNull GremlinSource source) {
         if (!(source instanceof GremlinSourceEdge)) {
             throw new GremlinUnexpectedSourceTypeException("should be the instance of GremlinSourceEdge");
         }
 
-        return Collections.singletonList(Constants.GREMLIN_SCRIPT_EDGE_ALL);
+        return String.join(Constants.GREMLIN_PRIMITIVE_INVOKE,
+            Constants.GREMLIN_SCRIPT_EDGE_ALL,
+            Constants.GREMLIN_PRIMITIVE_COUNT);
+    }
+
+
+    /**
+     * Generate the Count query for a particular edge label.
+     * @param source The {@link GremlinSource} instane.
+     * @return The query.
+     */
+    public String generateCountLabelScript(GremlinSource source) {
+        if (!(source instanceof GremlinSourceEdge)) {
+            throw new GremlinUnexpectedSourceTypeException("should be the instance of GremlinSourceEdge");
+        }
+
+        final String label = source.getLabel();
+        final List<String> scriptList = new ArrayList<>();
+
+        Assert.notNull(label, "label should not be null");
+
+        scriptList.add(Constants.GREMLIN_PRIMITIVE_GRAPH);
+        scriptList.add(Constants.GREMLIN_PRIMITIVE_EDGE_ALL);
+        scriptList.add(String.format(Constants.GREMLIN_PRIMITIVE_HAS_KEYWORD, Constants.PROPERTY_LABEL, label));
+        scriptList.add(Constants.GREMLIN_PRIMITIVE_COUNT);
+
+        final String query = String.join(Constants.GREMLIN_PRIMITIVE_INVOKE, scriptList);
+
+        return query;
     }
 
 

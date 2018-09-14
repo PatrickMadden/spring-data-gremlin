@@ -100,7 +100,7 @@ public class GremlinScriptLiteralGraph implements GremlinScriptLiteral {
     }
 
     @Override
-    public List<String> generateCountScript(@NonNull GremlinSource source) {
+    public String generateCountScript(@NonNull GremlinSource source) {
         throw new UnsupportedOperationException("Gremlin graph counting is not available.");
     }
 }

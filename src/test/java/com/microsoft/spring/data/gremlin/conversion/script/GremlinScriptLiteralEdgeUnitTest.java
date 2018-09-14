@@ -53,8 +53,8 @@ public class GremlinScriptLiteralEdgeUnitTest {
 
     @Test
     public void testGenerateCountScript() {
-        final List<String> queryList = new GremlinScriptLiteralEdge().generateCountScript(gremlinSource);
-        assertEquals(queryList.get(0), "g.E()");
+        final String query = new GremlinScriptLiteralEdge().generateCountScript(gremlinSource);
+        assertEquals(query, "g.E().count()");
     }
 
     @Test
