@@ -19,24 +19,39 @@ import java.lang.reflect.Field;
 import java.util.Date;
 
 public abstract class AbstractGremlinSourceReader {
+    protected static final int nullHashCode = "null".hashCode();
 
     protected Object readProperty(@NonNull PersistentProperty property, @NonNull Object value) {
         final Class<?> type = property.getTypeInformation().getType();
         final JavaType javaType = TypeFactory.defaultInstance().constructType(property.getType());
 
-        if (type == int.class || type == Integer.class
-                || type == Boolean.class || type == boolean.class
-                || type == String.class) {
+        if (type == int.class || type == Integer.class || type == Boolean.class || type == boolean.class) {
+            return nullHashCode == value.hashCode() ? null : value;
+        } else if (type == String.class) {
             return value;
         } else if (type == Date.class) {
-            Assert.isTrue(value instanceof Long || value instanceof Integer,
+            Assert.isTrue(value instanceof Long || value instanceof Integer || value instanceof String,
                 "Date store value must be instance of long or int. Data store value is " + value.getClass().getName());
 
             if (value instanceof Integer) {
                 final Integer integerValue = (Integer) value;
                 return new Date(integerValue.longValue());
-            } else {
+            } else if (value instanceof Long) {
                 return new Date((Long) value);
+            } else {
+                final String strValue = (String) value;
+
+                if ("null".equalsIgnoreCase(strValue)) {
+                    return null;
+                } else {
+                    try {
+                        return new Date(Long.parseLong(strValue));
+                    }
+                    catch (NumberFormatException nfe) {
+                        throw new GremlinUnexpectedEntityTypeException(
+                            "Failed to read String to Datae with value " + strValue);
+                    }
+                }
             }
         } else {
             final Object object;

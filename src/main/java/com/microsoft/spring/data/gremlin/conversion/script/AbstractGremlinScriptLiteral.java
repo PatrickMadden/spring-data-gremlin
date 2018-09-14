@@ -91,7 +91,7 @@ public abstract class AbstractGremlinScriptLiteral {
         return String.format(GREMLIN_PRIMITIVE_PROPERTY_NUMBER, name, value);
     }
 
-    private static String generateProperty(@NonNull String name, @NonNull Object value) {
+    protected String generateProperty(@NonNull String name, Object value) {
         if (value instanceof Integer) {
             return generateProperty(name, (Integer) value);
         } else if (value instanceof Boolean) {
@@ -115,9 +115,27 @@ public abstract class AbstractGremlinScriptLiteral {
         }
     }
 
+    private static String generateUpdateProperty(@NonNull String name, @NonNull String value) {
+        return String.format(GREMLIN_PRIMITIVE_UPDATE_PROPERTY_STRING, name, value);
+    }
 
-    protected String generateUpdateProperty(@NonNull String name, @NonNull Object value) {
+    private static String generateUpdateProperty(@NonNull String name, @NonNull Integer value) {
+        return String.format(GREMLIN_PRIMITIVE_UPDATE_PROPERTY_NUMBER, name, value);
+    }
 
+    private static String generateUpdateProperty(@NonNull String name, @NonNull Double value) {
+        return String.format(GREMLIN_PRIMITIVE_UPDATE_PROPERTY_DOUBLE, name, value);
+    }
+
+    private static String generateUpdateProperty(@NonNull String name, @NonNull Boolean value) {
+        return String.format(GREMLIN_PRIMITIVE_UPDATE_PROPERTY_BOOLEAN, name, value);
+    }
+
+    private static String generateUpdateProperty(@NonNull String name, @NonNull Long value) {
+        return String.format(GREMLIN_PRIMITIVE_UPDATE_PROPERTY_NUMBER, name, value);
+    }
+
+    protected String generateUpdateProperty(@NonNull String name, Object value) {
         if (value instanceof Integer) {
             return generateUpdateProperty(name, (Integer) value);
         } else if (value instanceof Boolean) {

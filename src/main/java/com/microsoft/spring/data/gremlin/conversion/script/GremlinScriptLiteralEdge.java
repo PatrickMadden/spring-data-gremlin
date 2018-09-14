@@ -13,10 +13,7 @@ import lombok.NoArgsConstructor;
 import lombok.NonNull;
 import org.springframework.lang.Nullable;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
 import static com.microsoft.spring.data.gremlin.common.Constants.*;
 import static com.microsoft.spring.data.gremlin.common.GremlinEntityType.EDGE;
@@ -146,9 +143,9 @@ public class GremlinScriptLiteralEdge extends AbstractGremlinScriptLiteral imple
             throw new GremlinUnexpectedSourceTypeException("should be the instance of GremlinSourceEdge");
         }
 
-        return String.join(Constants.GREMLIN_PRIMITIVE_INVOKE,
-            Constants.GREMLIN_SCRIPT_EDGE_ALL,
-            Constants.GREMLIN_PRIMITIVE_COUNT);
+        return String.join(GREMLIN_PRIMITIVE_INVOKE,
+            GREMLIN_SCRIPT_EDGE_ALL,
+            GREMLIN_PRIMITIVE_COUNT);
     }
 
 
@@ -162,19 +159,14 @@ public class GremlinScriptLiteralEdge extends AbstractGremlinScriptLiteral imple
             throw new GremlinUnexpectedSourceTypeException("should be the instance of GremlinSourceEdge");
         }
 
-        final String label = source.getLabel();
-        final List<String> scriptList = new ArrayList<>();
+        final List<String> scriptList = Arrays.asList(
+            GREMLIN_PRIMITIVE_GRAPH,
+            GREMLIN_PRIMITIVE_EDGE_ALL,
+            generateHasLabel(source.getLabel()),
+            GREMLIN_PRIMITIVE_COUNT
+        );
 
-        Assert.notNull(label, "label should not be null");
-
-        scriptList.add(Constants.GREMLIN_PRIMITIVE_GRAPH);
-        scriptList.add(Constants.GREMLIN_PRIMITIVE_EDGE_ALL);
-        scriptList.add(String.format(Constants.GREMLIN_PRIMITIVE_HAS_KEYWORD, Constants.PROPERTY_LABEL, label));
-        scriptList.add(Constants.GREMLIN_PRIMITIVE_COUNT);
-
-        final String query = String.join(Constants.GREMLIN_PRIMITIVE_INVOKE, scriptList);
-
-        return query;
+        return String.join(Constants.GREMLIN_PRIMITIVE_INVOKE, scriptList);
     }
 
 

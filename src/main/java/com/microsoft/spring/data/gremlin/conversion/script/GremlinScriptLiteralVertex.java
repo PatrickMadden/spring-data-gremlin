@@ -168,19 +168,14 @@ public class GremlinScriptLiteralVertex extends AbstractGremlinScriptLiteral imp
             throw new GremlinUnexpectedSourceTypeException("should be the instance of GremlinSourceVertex");
         }
 
-        final String label = source.getLabel();
-        final List<String> scriptList = new ArrayList<>();
+        final List<String> scriptList = Arrays.asList(
+            GREMLIN_PRIMITIVE_GRAPH,
+            GREMLIN_PRIMITIVE_VERTEX_ALL,
+            generateHasLabel(source.getLabel()),
+            GREMLIN_PRIMITIVE_COUNT
+        );
 
-        Assert.notNull(label, "label should not be null");
-
-        scriptList.add(Constants.GREMLIN_PRIMITIVE_GRAPH);
-        scriptList.add(Constants.GREMLIN_PRIMITIVE_VERTEX_ALL);
-        scriptList.add(String.format(Constants.GREMLIN_PRIMITIVE_HAS_KEYWORD, Constants.PROPERTY_LABEL, label));
-        scriptList.add(Constants.GREMLIN_PRIMITIVE_COUNT);
-
-        final String query = String.join(Constants.GREMLIN_PRIMITIVE_INVOKE, scriptList);
-
-        return query;
+        return String.join(Constants.GREMLIN_PRIMITIVE_INVOKE, scriptList);
     }
 }
 
