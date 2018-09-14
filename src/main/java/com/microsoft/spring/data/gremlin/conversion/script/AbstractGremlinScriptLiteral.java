@@ -5,22 +5,71 @@
  */
 package com.microsoft.spring.data.gremlin.conversion.script;
 
-import com.microsoft.spring.data.gremlin.common.Constants;
+import com.microsoft.spring.data.gremlin.common.GremlinEntityType;
 import com.microsoft.spring.data.gremlin.common.GremlinUtils;
-import com.microsoft.spring.data.gremlin.conversion.source.GremlinSource;
+import com.microsoft.spring.data.gremlin.exception.GremlinInvalidEntityIdFieldException;
 import com.microsoft.spring.data.gremlin.exception.GremlinUnexpectedEntityTypeException;
+import lombok.NonNull;
 import org.apache.tinkerpop.shaded.jackson.core.JsonProcessingException;
-import org.springframework.lang.NonNull;
 import org.springframework.util.Assert;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import static com.microsoft.spring.data.gremlin.common.Constants.*;
 
 public abstract class AbstractGremlinScriptLiteral {
+
+    protected static String generateEntityWithRequiredId(@NonNull Object id, GremlinEntityType type) {
+        Assert.isTrue(type == GremlinEntityType.EDGE || type == GremlinEntityType.VERTEX, "should be edge/vertex type");
+
+        final String prefix = (type == GremlinEntityType.VERTEX) ? "V" : "E";
+
+        if (id instanceof String) {
+            return prefix + String.format("('%s')", (String) id);
+        } else if (id instanceof Integer) {
+            return prefix + String.format("(%d)", (Integer) id);
+        } else if (id instanceof Long) {
+            return prefix + String.format("(%d)", (Long) id);
+        }
+
+        throw new GremlinInvalidEntityIdFieldException("Only String/Integer/Long of id is supported");
+    }
+
+    protected static String generatePropertyWithRequiredId(@NonNull Object id) {
+        if (id instanceof String) {
+            return String.format("property(id, '%s')", (String) id);
+        } else if (id instanceof Integer) {
+            return String.format("property(id, %d)", (Integer) id);
+        } else if (id instanceof Long) {
+            return String.format("property(id, %d)", (Long) id);
+        }
+
+        throw new GremlinInvalidEntityIdFieldException("Only String/Integer/Long of id is supported");
+    }
+
+    protected static String generateAsWithAlias(@NonNull String alias) {
+        return String.format("as('%s')", alias);
+    }
+
+    protected static String generateAddEntityWithLabel(@NonNull String label, GremlinEntityType type) {
+        Assert.isTrue(type == GremlinEntityType.EDGE || type == GremlinEntityType.VERTEX, "should be edge/vertex type");
+
+        final String prefix = (type == GremlinEntityType.VERTEX) ? "addV" : "addE";
+
+        return prefix + String.format("('%s')", label);
+    }
+
+    protected static List<String> completeScript(@NonNull List<String> scriptList) {
+        return Collections.singletonList(String.join(GREMLIN_PRIMITIVE_INVOKE, scriptList));
+    }
+
+    public static String generateHasLabel(@NonNull String label) {
+        return String.format("has(label, '%s')", label);
+    }
+
+    public static String generateHasId(@NonNull String label) {
+        return String.format("has(id, '%s')", label);
+    }
 
     private static String generateProperty(@NonNull String name, @NonNull String value) {
         return String.format(GREMLIN_PRIMITIVE_PROPERTY_STRING, name, value);
@@ -42,28 +91,7 @@ public abstract class AbstractGremlinScriptLiteral {
         return String.format(GREMLIN_PRIMITIVE_PROPERTY_NUMBER, name, value);
     }
 
-    private static String generateUpdateProperty(@NonNull String name, @NonNull String value) {
-        return String.format(GREMLIN_PRIMITIVE_UPDATE_PROPERTY_STRING, name, value);
-    }
-
-    private static String generateUpdateProperty(@NonNull String name, @NonNull Integer value) {
-        return String.format(GREMLIN_PRIMITIVE_UPDATE_PROPERTY_NUMBER, name, value);
-    }
-
-    private static String generateUpdateProperty(@NonNull String name, @NonNull Double value) {
-        return String.format(GREMLIN_PRIMITIVE_UPDATE_PROPERTY_DOUBLE, name, value);
-    }
-
-    private static String generateUpdateProperty(@NonNull String name, @NonNull Boolean value) {
-        return String.format(GREMLIN_PRIMITIVE_UPDATE_PROPERTY_BOOLEAN, name, value);
-    }
-
-    private static String generateUpdateProperty(@NonNull String name, @NonNull Long value) {
-        return String.format(GREMLIN_PRIMITIVE_UPDATE_PROPERTY_NUMBER, name, value);
-    }
-
-    protected String generateProperty(@NonNull String name, @NonNull Object value) {
-
+    private static String generateProperty(@NonNull String name, @NonNull Object value) {
         if (value instanceof Integer) {
             return generateProperty(name, (Integer) value);
         } else if (value instanceof Boolean) {
@@ -149,6 +177,7 @@ public abstract class AbstractGremlinScriptLiteral {
         return String.format(GREMLIN_PRIMITIVE_HAS_NUMBER, name, value);
     }
 
+    // TODO: should move to query method part.
     public static String generateHas(@NonNull String name, @NonNull Object value) {
 
         if (value instanceof Integer) {

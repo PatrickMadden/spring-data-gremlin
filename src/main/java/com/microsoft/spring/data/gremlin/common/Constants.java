@@ -25,7 +25,7 @@ public class Constants {
     public static final String DEFAULT_VERTEX_LABEL = "";
     public static final String DEFAULT_EDGE_LABEL = "";
     public static final String DEFAULT_COLLECTION_NAME = "";
-    public static final String DEFAULT_ENDPOINT_PORT = "443";
+    public static final int DEFAULT_ENDPOINT_PORT = 443;
     public static final String DEFAULT_REPOSITORY_IMPLEMENT_POSTFIX = "Impl";
 
     public static final String GREMLIN_MODULE_NAME = "Gremlin";
@@ -37,26 +37,19 @@ public class Constants {
     public static final String GREMLIN_PRIMITIVE_DROP = "drop()";
     public static final String GREMLIN_PRIMITIVE_COUNT = "count()";
 
-    public static final String GREMLIN_PRIMITIVE_EDGE = "E('%s')";
     public static final String GREMLIN_PRIMITIVE_EDGE_ALL = "E()";
-    public static final String GREMLIN_PRIMITIVE_ADD_EDGE = "addE('%s')";
 
-    public static final String GREMLIN_PRIMITIVE_VERTEX = "V('%s')";
     public static final String GREMLIN_PRIMITIVE_VERTEX_ALL = "V()";
-    public static final String GREMLIN_PRIMITIVE_ADD_VERTEX = "addV('%s')";
-    public static final String GREMLIN_PRIMITIVE_TO_VERTEX = "to(g.V('%s'))";
 
     public static final String GREMLIN_PRIMITIVE_HAS_STRING = "has('%s', '%s')";
     public static final String GREMLIN_PRIMITIVE_HAS_NUMBER = "has('%s', %d)";
     public static final String GREMLIN_PRIMITIVE_HAS_DOUBLE = "has('%s', %f)";
     public static final String GREMLIN_PRIMITIVE_HAS_BOOLEAN = "has('%s', %b)";
-    public static final String GREMLIN_PRIMITIVE_HAS_KEYWORD = "has(%s, '%s')";
 
     public static final String GREMLIN_PRIMITIVE_PROPERTY_STRING = "property('%s', '%s')";
     public static final String GREMLIN_PRIMITIVE_PROPERTY_NUMBER = "property('%s', %d)";
     public static final String GREMLIN_PRIMITIVE_PROPERTY_DOUBLE = "property('%s', %f)";
     public static final String GREMLIN_PRIMITIVE_PROPERTY_BOOLEAN = "property('%s', %b)";
-    public static final String GREMLIN_PRIMITIVE_PROPERTY_KEYWORD = "property(%s, '%s')";
 
     public static final String GREMLIN_PRIMITIVE_UPDATE_PROPERTY_STRING = "property(single, '%s', '%s')";
     public static final String GREMLIN_PRIMITIVE_UPDATE_PROPERTY_NUMBER = "property(single, '%s', %d)";
