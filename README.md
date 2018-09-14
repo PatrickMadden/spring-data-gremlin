@@ -56,7 +56,9 @@ This repository only supports Spring Data 2.x.
   - ```<T> T findEdgeById(Object id, Class<T> domainClass);```
   - ```<T> boolean isEmptyGraph(T object)```
   - ```long vertexCount()```
+  - ```long vertexCount(Class<T> domainClass)```
   - ```long edgeCount()```
+  - ```long edgeCount(Class<T> domainClass)```
 - Supports [Spring Data custom query](https://docs.spring.io/spring-data/commons/docs/current/reference/html/#repositories.query-methods.details) find operation, e.g.,  `findByAFieldAndBField`
 - Supports any class type in domain class including collection and nested type.
 
