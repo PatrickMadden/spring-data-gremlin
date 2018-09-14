@@ -37,6 +37,7 @@ public class UserRepositoryConfiguration extends AbstractGremlinConfiguration {
     @Override
     public GremlinConfig getGremlinConfig() {
     	return new GremlinConfig(gremlinProps.getEndpoint(), gremlinProps.getPort(), gremlinProps.getUsername(),
-    			gremlinProps.getPassword(), gremlinProps.isTelemetryAllowed());
+    			gremlinProps.getPassword(), gremlinProps.isTelemetryAllowed(), gremlinProps.isSslEnabled(),
+                gremlinProps.getMaxContentLength(), gremlinProps.getSerializersName());
     }
 }

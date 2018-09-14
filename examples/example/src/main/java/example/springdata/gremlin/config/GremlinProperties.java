@@ -9,6 +9,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import com.microsoft.spring.data.gremlin.common.Constants;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
 @Getter
@@ -26,4 +27,10 @@ public class GremlinProperties {
     private String password;
 
     private boolean telemetryAllowed = true;
+
+    private boolean sslEnabled = true;
+
+    private int maxContentLength = Constants.DEFAULT_MAX_CONTENT_LENGTH;
+
+    private String serializersName = Constants.DEFAULT_SERIALIZERS.name();
 }

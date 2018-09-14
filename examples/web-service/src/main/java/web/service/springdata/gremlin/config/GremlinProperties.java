@@ -26,4 +26,10 @@ public class GremlinProperties {
     private String password;
 
     private boolean telemetryAllowed = true;
+
+    private boolean sslEnabled = true;
+
+    private int maxContentLength = 65536;
+
+    private String serializersName = Constants.DEFAULT_SERIALIZERS.name();
 }

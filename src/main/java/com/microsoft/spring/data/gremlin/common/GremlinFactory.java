@@ -14,6 +14,7 @@ import org.apache.tinkerpop.gremlin.driver.ser.Serializers;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.lang.NonNull;
 
+
 public class GremlinFactory {
 
     @Getter
@@ -41,11 +42,22 @@ public class GremlinFactory {
         final Cluster cluster;
 
         try {
+            final String serializersName = this.gremlinConfig.getSerializersName();
+
+            Serializers serializers;
+
+            if (serializersName != null) {
+                serializers = Serializers.valueOf(serializersName);
+            } else {
+                serializers = Constants.DEFAULT_SERIALIZERS;
+            }
+
             cluster = Cluster.build(this.gremlinConfig.getEndpoint())
-                    .serializer(Serializers.GRAPHSON_V1D0)
+                    .serializer(serializers)
                     .credentials(this.gremlinConfig.getUsername(), this.gremlinConfig.getPassword())
-                    .enableSsl(true)
+                    .enableSsl(this.gremlinConfig.isSslEnabled())
                     .port(this.gremlinConfig.getPort())
+                    .maxContentLength(this.gremlinConfig.getMaxContentLength())
                     .create();
         } catch (IllegalArgumentException e) {
             throw new GremlinIllegalConfigurationException("Invalid configuration of Gremlin", e);

@@ -26,12 +26,20 @@ public class GremlinConfig {
 
     private boolean telemetryAllowed;
 
+    private boolean sslEnabled = true;
+
+    private int maxContentLength = Constants.DEFAULT_MAX_CONTENT_LENGTH;
+
+    private String serializersName;
+
     public static GremlinConfigBuilder builder(String endpoint, String username, String password) {
         return defaultBuilder()
                 .endpoint(endpoint)
                 .username(username)
                 .password(password)
                 .port(Constants.DEFAULT_ENDPOINT_PORT)
-                .telemetryAllowed(true);
+                .telemetryAllowed(true)
+                .maxContentLength(Constants.DEFAULT_MAX_CONTENT_LENGTH)
+                .serializersName(Constants.DEFAULT_SERIALIZERS.name());
     }
 }

@@ -28,4 +28,8 @@ public class TestGremlinProperties {
     private boolean sslEnabled = true;
 
     private boolean telemetryAllowed = true;
+
+    private int maxContentLength = Constants.DEFAULT_MAX_CONTENT_LENGTH;
+
+    private String serializersName = Constants.DEFAULT_SERIALIZERS.name();
 }

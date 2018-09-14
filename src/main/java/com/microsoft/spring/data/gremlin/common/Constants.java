@@ -5,6 +5,8 @@
  */
 package com.microsoft.spring.data.gremlin.common;
 
+import org.apache.tinkerpop.gremlin.driver.ser.Serializers;
+
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 
@@ -27,6 +29,8 @@ public class Constants {
     public static final String DEFAULT_COLLECTION_NAME = "";
     public static final int DEFAULT_ENDPOINT_PORT = 443;
     public static final String DEFAULT_REPOSITORY_IMPLEMENT_POSTFIX = "Impl";
+    public static final int DEFAULT_MAX_CONTENT_LENGTH = 65536;
+    public static final Serializers DEFAULT_SERIALIZERS = Serializers.GRAPHSON;
 
     public static final String GREMLIN_MODULE_NAME = "Gremlin";
     public static final String GREMLIN_MODULE_PREFIX = "gremlin";
