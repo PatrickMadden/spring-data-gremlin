@@ -52,6 +52,12 @@ public class GremlinScriptLiteralVertexUnitTest {
     }
 
     @Test
+    public void testGenerateCountLabelScript() {
+        final String query = new GremlinScriptLiteralVertex().generateCountLabelScript(gremlinSource);
+        assertEquals(query, "g.V().has(label, 'label-person').count()");
+    }
+
+    @Test
     public void testGenerateFindByIdScript() {
         final List<String> queryList = new GremlinScriptLiteralVertex().generateFindByIdScript(gremlinSource);
         assertEquals(queryList.get(0), "g.V('123')");
@@ -72,7 +78,7 @@ public class GremlinScriptLiteralVertexUnitTest {
     @Test
     public void testGenerateUpdateScript() {
         final List<String> queryList = new GremlinScriptLiteralVertex().generateUpdateScript(gremlinSource);
-        assertEquals(queryList.get(0), "g.V('123').property('name', 'bill')");
+        assertEquals(queryList.get(0), "g.V('123').property(single, 'name', 'bill')");
     }
 
     @Test
