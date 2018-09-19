@@ -12,6 +12,7 @@ import com.microsoft.spring.data.gremlin.common.domain.Book;
 import com.microsoft.spring.data.gremlin.common.repository.BookRepository;
 import lombok.NonNull;
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -48,12 +49,13 @@ public class BookRepositoryIT {
     @Autowired
     private BookRepository repository;
 
+    @Before
     public void setup() {
         this.repository.deleteAll();
     }
 
     private void assertDomainListEquals(@NonNull List<Book> found, @NonNull List<Book> expected) {
-        found.sort(Comparator.comparing(Book::getName));
+        found.sort(Comparator.comparing(Book::getSerialNumber));
         expected.sort(Comparator.comparing(Book::getSerialNumber));
 
         Assert.assertEquals(found.size(), expected.size());

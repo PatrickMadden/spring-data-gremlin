@@ -7,7 +7,6 @@ package com.microsoft.spring.data.gremlin.common;
 
 import com.microsoft.spring.data.gremlin.exception.GremlinIllegalConfigurationException;
 import com.microsoft.spring.data.gremlin.telemetry.TelemetryTracker;
-import lombok.Getter;
 import org.apache.tinkerpop.gremlin.driver.Client;
 import org.apache.tinkerpop.gremlin.driver.Cluster;
 import org.apache.tinkerpop.gremlin.driver.ser.Serializers;
@@ -17,7 +16,6 @@ import org.springframework.lang.NonNull;
 
 public class GremlinFactory {
 
-    @Getter
     private Cluster gremlinCluster;
 
     private GremlinConfig gremlinConfig;
