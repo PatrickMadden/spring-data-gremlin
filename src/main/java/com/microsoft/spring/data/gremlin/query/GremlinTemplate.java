@@ -5,6 +5,7 @@
  */
 package com.microsoft.spring.data.gremlin.query;
 
+
 import com.microsoft.spring.data.gremlin.annotation.EdgeFrom;
 import com.microsoft.spring.data.gremlin.annotation.EdgeTo;
 import com.microsoft.spring.data.gremlin.common.GremlinEntityType;
@@ -36,7 +37,6 @@ import org.springframework.data.mapping.PersistentProperty;
 import org.springframework.data.mapping.model.ConvertingPropertyAccessor;
 import org.springframework.lang.NonNull;
 import org.springframework.util.Assert;
-
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
@@ -113,7 +113,7 @@ public class GremlinTemplate implements GremlinOperations, ApplicationContextAwa
         try {
             final Result result = this.getGremlinClient().submit(query).one();
             return result.getLong();
-        } catch (CompletionException e) {
+        } catch (Throwable e) {
             throw new GremlinQueryException(String.format("unable to complete execute %s from gremlin", query), e);
         }
     }
