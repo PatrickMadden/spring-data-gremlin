@@ -29,6 +29,7 @@ public class TestRepositoryConfiguration extends AbstractGremlinConfiguration {
             testProps.isTelemetryAllowed(),
             testProps.isSslEnabled(),
             testProps.getMaxContentLength(),
+            testProps.getMaxWaitForConnection(),
             testProps.getSerializersName());
     }
 }

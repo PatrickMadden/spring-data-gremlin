@@ -14,7 +14,12 @@ public enum CriteriaType {
     EXISTS,
     AFTER,
     BEFORE,
-    BETWEEN;
+    BETWEEN,
+    INV,
+    OUTV,
+    OUTE,
+    INE,
+    NOT;
 
     public static String criteriaTypeToGremlin(CriteriaType type) {
         switch (type) {
@@ -28,6 +33,10 @@ public enum CriteriaType {
                 return GREMLIN_PRIMITIVE_IS_LT;
             case BETWEEN:
                 return GREMLIN_PRIMITIVE_IS_BETWEEN;
+            case INV:
+                return GREMLIN_PRIMITIVE_INV;
+            case OUTV:
+                return GREMLIN_PRIMITIVE_OUTV;
             default:
                 throw new UnsupportedOperationException("Unsupported criteria type.");
         }

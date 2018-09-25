@@ -5,12 +5,15 @@
  */
 package com.microsoft.spring.data.gremlin.query.criteria;
 
-import lombok.Getter;
+
+import com.microsoft.spring.data.gremlin.common.Constants;
 import org.springframework.lang.NonNull;
 import org.springframework.util.Assert;
-
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+
+import lombok.Getter;
 
 @Getter
 public class Criteria {
@@ -42,10 +45,50 @@ public class Criteria {
             case BEFORE:
             case BETWEEN:
             case IS_EQUAL:
+            case NOT:
                 return true;
             default:
                 return false;
         }
+    }
+
+    public static Criteria getNotInstance(Criteria criteria) {
+
+        final Criteria notCriteria = new Criteria(CriteriaType.NOT);
+
+        notCriteria.subCriteria.add(criteria);
+
+        return notCriteria;
+    }
+
+
+    public static Criteria getInVInstance()
+    {
+        return new Criteria(CriteriaType.INV);
+    }
+
+
+    public static Criteria getOutVInstance()
+    {
+        return new Criteria(CriteriaType.OUTV);
+    }
+
+    public static Criteria getOutEdgeInstance(String label)
+    {
+        final Criteria criteria = new Criteria(CriteriaType.OUTE);
+        criteria.subject = Constants.GREMLIN_PRIMITIVE_OUT_EDGE;
+        criteria.subValues = Arrays.asList(label);
+
+        return criteria;
+    }
+
+    public static Criteria getInEdgeInstance(String label)
+    {
+        final Criteria criteria = new Criteria(CriteriaType.INE);
+        criteria.subject = Constants.GREMLIN_PRIMITIVE_IN_EDGE;
+        criteria.subValues = Arrays.asList(label);
+
+        return criteria;
     }
 
     public static Criteria getUnaryInstance(CriteriaType type, @NonNull String subject, @NonNull List<Object> values) {

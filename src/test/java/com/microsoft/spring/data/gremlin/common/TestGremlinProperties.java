@@ -5,11 +5,13 @@
  */
 package com.microsoft.spring.data.gremlin.common;
 
+
+import org.springframework.boot.context.properties.ConfigurationProperties;
+
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.springframework.boot.context.properties.ConfigurationProperties;
 
 @Getter
 @Setter
@@ -30,6 +32,8 @@ public class TestGremlinProperties {
     private boolean telemetryAllowed = true;
 
     private int maxContentLength = Constants.DEFAULT_MAX_CONTENT_LENGTH;
+
+    private int maxWaitForConnection = Constants.DEFAULT_MAX_WAIT_FOR_CONNECTION;
 
     private String serializersName = Constants.DEFAULT_SERIALIZERS.name();
 }

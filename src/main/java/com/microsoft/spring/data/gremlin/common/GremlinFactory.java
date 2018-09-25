@@ -56,6 +56,7 @@ public class GremlinFactory {
                     .enableSsl(this.gremlinConfig.isSslEnabled())
                     .port(this.gremlinConfig.getPort())
                     .maxContentLength(this.gremlinConfig.getMaxContentLength())
+                    .maxWaitForConnection(this.gremlinConfig.getMaxWaitForConnection())
                     .create();
         } catch (IllegalArgumentException e) {
             throw new GremlinIllegalConfigurationException("Invalid configuration of Gremlin", e);

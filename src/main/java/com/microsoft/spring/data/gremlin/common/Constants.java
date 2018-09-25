@@ -30,6 +30,7 @@ public class Constants {
     public static final int DEFAULT_ENDPOINT_PORT = 443;
     public static final String DEFAULT_REPOSITORY_IMPLEMENT_POSTFIX = "Impl";
     public static final int DEFAULT_MAX_CONTENT_LENGTH = 65536;
+    public static final int DEFAULT_MAX_WAIT_FOR_CONNECTION = 3000;
     public static final Serializers DEFAULT_SERIALIZERS = Serializers.GRAPHSON;
 
     public static final String GREMLIN_MODULE_NAME = "Gremlin";
@@ -55,6 +56,9 @@ public class Constants {
     public static final String GREMLIN_PRIMITIVE_PROPERTY_DOUBLE = "property('%s', %f)";
     public static final String GREMLIN_PRIMITIVE_PROPERTY_BOOLEAN = "property('%s', %b)";
 
+    public static final String GREMLIN_PRIMITIVE_OUT_EDGE = "outE('%s')";
+    public static final String GREMLIN_PRIMITIVE_IN_EDGE = "inE('%s')";
+
     public static final String GREMLIN_PRIMITIVE_UPDATE_PROPERTY_STRING = "property(single, '%s', '%s')";
     public static final String GREMLIN_PRIMITIVE_UPDATE_PROPERTY_NUMBER = "property(single, '%s', %d)";
     public static final String GREMLIN_PRIMITIVE_UPDATE_PROPERTY_DOUBLE = "property(single, '%s', %f)";
@@ -65,6 +69,7 @@ public class Constants {
     public static final String GREMLIN_PRIMITIVE_AND = "and()";
     public static final String GREMLIN_PRIMITIVE_OR = "or()";
     public static final String GREMLIN_PRIMITIVE_WHERE = "where(%s)";
+    public static final String GREMLIN_PRIMITIVE_NOT = "not(%s)";
 
     public static final String GREMLIN_QUERY_BARRIER = "barrier";
 
@@ -73,6 +78,8 @@ public class Constants {
     public static final String GREMLIN_PRIMITIVE_GT = "gt(%d)";
     public static final String GREMLIN_PRIMITIVE_LT = "lt(%d)";
     public static final String GREMLIN_PRIMITIVE_BETWEEN = "between(%d, %d)";
+    public static final String GREMLIN_PRIMITIVE_INV = "inV()";
+    public static final String GREMLIN_PRIMITIVE_OUTV = "outV()";
 
     public static final String GREMLIN_PRIMITIVE_IS_GT = String.format(GREMLIN_PRIMITIVE_IS, GREMLIN_PRIMITIVE_GT);
     public static final String GREMLIN_PRIMITIVE_IS_LT = String.format(GREMLIN_PRIMITIVE_IS, GREMLIN_PRIMITIVE_LT);
