@@ -5,6 +5,7 @@
  */
 package com.microsoft.spring.data.gremlin.conversion;
 
+
 import com.microsoft.spring.data.gremlin.common.TestConstants;
 import com.microsoft.spring.data.gremlin.common.domain.Person;
 import com.microsoft.spring.data.gremlin.common.domain.Project;
@@ -12,7 +13,6 @@ import com.microsoft.spring.data.gremlin.common.domain.Relationship;
 import com.microsoft.spring.data.gremlin.conversion.source.GremlinSource;
 import com.microsoft.spring.data.gremlin.mapping.GremlinMappingContext;
 import com.microsoft.spring.data.gremlin.repository.support.GremlinEntityInformation;
-import org.apache.commons.lang3.reflect.FieldUtils;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -20,7 +20,6 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.context.ApplicationContext;
-
 import java.lang.reflect.Field;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -49,7 +48,7 @@ public class MappingGremlinConverterUnitTest {
         Assert.assertNotNull(this.converter.getConversionService());
 
         final Person person = new Person(TestConstants.VERTEX_PERSON_ID, TestConstants.VERTEX_PERSON_NAME);
-        final Field[] fields = FieldUtils.getAllFields(Person.class);
+        final Field[] fields = this.converter.getAllFields(Person.class);
 
         Assert.assertNotNull(this.converter.getPropertyAccessor(person));
         Assert.assertEquals(fields.length, 2);

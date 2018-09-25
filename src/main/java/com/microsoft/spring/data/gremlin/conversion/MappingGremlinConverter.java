@@ -9,6 +9,7 @@ import com.microsoft.spring.data.gremlin.common.GremlinUtils;
 import com.microsoft.spring.data.gremlin.conversion.source.GremlinSource;
 import com.microsoft.spring.data.gremlin.mapping.GremlinPersistentEntity;
 import com.microsoft.spring.data.gremlin.mapping.GremlinPersistentProperty;
+import org.apache.commons.lang3.reflect.FieldUtils;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.core.convert.ConversionService;
@@ -20,6 +21,8 @@ import org.springframework.data.mapping.context.MappingContext;
 import org.springframework.data.mapping.model.ConvertingPropertyAccessor;
 import org.springframework.lang.NonNull;
 import org.springframework.util.Assert;
+import java.lang.reflect.Field;
+
 
 public class MappingGremlinConverter
         implements EntityConverter<GremlinPersistentEntity<?>, GremlinPersistentProperty, Object, GremlinSource>,
@@ -100,6 +103,18 @@ public class MappingGremlinConverter
 
     public Object getIdFieldValue(@NonNull Object domain) {
         return this.getFieldValue(domain, this.getIdFieldName(domain));
+    }
+
+
+    /**
+     * This method returns all persistent {@link Field} instances for a given domain
+     * class.
+     * @param cls The domain implementation representing a vertex or edge.
+     * @return All persistent {@link Field} instances for a given domain class.
+     */
+    public Field[] getAllFields(Class<?> cls)
+    {
+        return FieldUtils.getAllFields(cls);
     }
 }
 
