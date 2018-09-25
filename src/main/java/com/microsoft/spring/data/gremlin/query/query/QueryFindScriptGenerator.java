@@ -5,29 +5,33 @@
  */
 package com.microsoft.spring.data.gremlin.query.query;
 
+
 import com.microsoft.spring.data.gremlin.common.GremlinUtils;
 import com.microsoft.spring.data.gremlin.query.criteria.Criteria;
 import com.microsoft.spring.data.gremlin.query.criteria.CriteriaType;
 import com.microsoft.spring.data.gremlin.repository.support.GremlinEntityInformation;
-import lombok.AccessLevel;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
 import org.springframework.lang.NonNull;
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
 import static com.microsoft.spring.data.gremlin.common.Constants.*;
 import static com.microsoft.spring.data.gremlin.conversion.script.AbstractGremlinScriptLiteral.*;
 
+@AllArgsConstructor
 @NoArgsConstructor
 public class QueryFindScriptGenerator implements QueryScriptGenerator {
 
-    @Setter(AccessLevel.PRIVATE)
+    @Getter
+    @Setter
     private GremlinEntityInformation information;
 
-    private String getCriteriaSubject(@NonNull Criteria criteria) {
+    public String getCriteriaSubject(@NonNull Criteria criteria) {
         String subject = criteria.getSubject();
 
         if (subject.equals(this.information.getIdField().getName())) {
@@ -37,7 +41,7 @@ public class QueryFindScriptGenerator implements QueryScriptGenerator {
         return subject;
     }
 
-    private String generateIsEqual(@NonNull Criteria criteria) {
+    public String generateIsEqual(@NonNull Criteria criteria) {
         final String subject = getCriteriaSubject(criteria);
 
         if (subject.equals(PROPERTY_ID)) {
@@ -47,13 +51,41 @@ public class QueryFindScriptGenerator implements QueryScriptGenerator {
         }
     }
 
+
+    /**
+     * Generates a where(not(%s))
+     * @param criteria
+     * @return
+     */
+    public String generateNot(@NonNull Criteria criteria) {
+        return String.format(GREMLIN_PRIMITIVE_NOT,
+                this.generateScriptTraversal(criteria.getSubCriteria().get(0)));
+    }
+
+
+    public String generateInVScript(@NonNull Criteria criteria) {
+        return GREMLIN_PRIMITIVE_INV;
+    }
+
+    public String generateOutVScript(@NonNull Criteria criteria) {
+        return GREMLIN_PRIMITIVE_OUTV;
+    }
+
+    public String generateOutEdgeScript(@NonNull Criteria criteria) {
+        return String.format(criteria.getSubject(), criteria.getSubValues().get(0));
+    }
+
+    public String generateInEdgeScript(@NonNull Criteria criteria) {
+        return String.format(criteria.getSubject(), criteria.getSubValues().get(0));
+    }
+
     /**
      * Generate script with only one subject and no subValue, like findByActiveExists().
      *
      * @param criteria given query represent a query subject
      * @return simple script with keyword from criteria type
      */
-    private String generateEmptyScript(@NonNull Criteria criteria) {
+    public String generateEmptyScript(@NonNull Criteria criteria) {
         final String subject = this.getCriteriaSubject(criteria);
         final String has = generateHas(subject, true);
 
@@ -66,7 +98,7 @@ public class QueryFindScriptGenerator implements QueryScriptGenerator {
      * @param criteria given query represent a query subject
      * @return simple script with keyword from criteria type
      */
-    private String generateSingleScript(@NonNull Criteria criteria) {
+    public String generateSingleScript(@NonNull Criteria criteria) {
         final CriteriaType type = criteria.getType();
         final String subject = this.getCriteriaSubject(criteria);
         final long milliSeconds = GremlinUtils.timeToMilliSeconds(criteria.getSubValues().get(0));
@@ -84,7 +116,7 @@ public class QueryFindScriptGenerator implements QueryScriptGenerator {
      * @param criteria given query represent a query subject
      * @return simple script with keyword from criteria type
      */
-    private String generateDoubleScript(Criteria criteria) {
+    public String generateDoubleScript(Criteria criteria) {
         final CriteriaType type = criteria.getType();
         final String subject = this.getCriteriaSubject(criteria);
         final long start = GremlinUtils.toPrimitiveLong(criteria.getSubValues().get(0));
@@ -105,7 +137,7 @@ public class QueryFindScriptGenerator implements QueryScriptGenerator {
      * @param type  should be AND/OR
      * @return combined script with AND/OR
      */
-    private String generateCombinedScript(@NonNull String left, @NonNull String right, CriteriaType type) {
+    public String generateCombinedScript(@NonNull String left, @NonNull String right, CriteriaType type) {
         final String operation = CriteriaType.criteriaTypeToGremlin(type);
         final String content = String.join(GREMLIN_PRIMITIVE_INVOKE, left, operation, right);
 
@@ -113,12 +145,14 @@ public class QueryFindScriptGenerator implements QueryScriptGenerator {
     }
 
 
-    private String generateScriptTraversal(@NonNull Criteria criteria) {
+    public String generateScriptTraversal(@NonNull Criteria criteria) {
         final CriteriaType type = criteria.getType();
 
         switch (type) {
             case IS_EQUAL:
                 return this.generateIsEqual(criteria);
+            case NOT:
+                return this.generateNot(criteria);
             case AND:
             case OR:
                 final String left = this.generateScriptTraversal(criteria.getSubCriteria().get(0));
@@ -132,13 +166,20 @@ public class QueryFindScriptGenerator implements QueryScriptGenerator {
                 return this.generateDoubleScript(criteria);
             case EXISTS:
                 return this.generateEmptyScript(criteria);
+            case INV:
+                return this.generateInVScript(criteria);
+            case OUTV:
+                return this.generateOutVScript(criteria);
+            case INE:
+                return this.generateInEdgeScript(criteria);
+            case OUTE:
+                return this.generateOutEdgeScript(criteria);
             default:
                 throw new UnsupportedOperationException("unsupported Criteria type");
         }
     }
 
-    private List<String> generateScript(@NonNull GremlinQuery query) {
-        final Criteria criteria = query.getCriteria();
+    public List<String> generateScript(@NonNull GremlinQuery query) {
         final List<String> scriptList = new ArrayList<>();
 
         scriptList.add(GREMLIN_PRIMITIVE_GRAPH);
@@ -152,7 +193,13 @@ public class QueryFindScriptGenerator implements QueryScriptGenerator {
         }
 
         scriptList.add(generateHasLabel(information.getEntityLabel()));
-        scriptList.add(this.generateScriptTraversal(criteria));
+
+        final Criteria criteria = query.getCriteria();
+
+        if (criteria != null)
+        {
+            scriptList.add(this.generateScriptTraversal(criteria));
+        }
 
         return scriptList;
     }
