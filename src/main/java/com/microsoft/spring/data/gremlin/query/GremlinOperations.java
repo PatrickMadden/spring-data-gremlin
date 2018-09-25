@@ -5,10 +5,11 @@
  */
 package com.microsoft.spring.data.gremlin.query;
 
+
 import com.microsoft.spring.data.gremlin.common.GremlinEntityType;
 import com.microsoft.spring.data.gremlin.conversion.MappingGremlinConverter;
 import com.microsoft.spring.data.gremlin.query.query.GremlinQuery;
-
+import org.springframework.lang.NonNull;
 import java.util.List;
 
 /**
@@ -47,6 +48,8 @@ public interface GremlinOperations {
     <T> long edgeCount(Class<T> domainClass);
 
     <T> List<T> find(GremlinQuery query, Class<T> domainClass);
+
+    <T> List<T> find(@NonNull List<String> queryList, @NonNull Class<T> domainClass);
 
     MappingGremlinConverter getMappingConverter();
 }
