@@ -10,7 +10,6 @@ import com.microsoft.spring.data.gremlin.annotation.EdgeFrom;
 import com.microsoft.spring.data.gremlin.annotation.EdgeTo;
 import com.microsoft.spring.data.gremlin.common.GremlinEntityType;
 import com.microsoft.spring.data.gremlin.common.GremlinFactory;
-import com.microsoft.spring.data.gremlin.common.GremlinUtils;
 import com.microsoft.spring.data.gremlin.conversion.MappingGremlinConverter;
 import com.microsoft.spring.data.gremlin.conversion.script.GremlinScriptLiteral;
 import com.microsoft.spring.data.gremlin.conversion.script.GremlinScriptLiteralEdge;
@@ -30,6 +29,8 @@ import com.microsoft.spring.data.gremlin.repository.support.GremlinEntityInforma
 import org.apache.commons.lang3.reflect.FieldUtils;
 import org.apache.tinkerpop.gremlin.driver.Client;
 import org.apache.tinkerpop.gremlin.driver.Result;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
@@ -42,10 +43,12 @@ import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.concurrent.ExecutionException;
+import java.util.Map;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
-
-import static java.util.stream.Collectors.toList;
 
 
 public class GremlinTemplate implements GremlinOperations, ApplicationContextAware {
@@ -55,6 +58,16 @@ public class GremlinTemplate implements GremlinOperations, ApplicationContextAwa
 
     private Client gremlinClient;
     private ApplicationContext context;
+
+    //static final int numberOfVirtualCPUs = 4;
+    static final ExecutorService executor = Executors.newFixedThreadPool(
+        Runtime.getRuntime().availableProcessors());
+
+    static Logger logger = LoggerFactory.getLogger(GremlinTemplate.class);
+
+    Map<Object, Object> idToDomainVertices = new ConcurrentHashMap<>();
+    Map<Object, Object> idToDomainEdges = new ConcurrentHashMap<>();
+
 
     public GremlinTemplate(@NonNull GremlinFactory factory, @NonNull MappingGremlinConverter converter) {
         this.factory = factory;
@@ -68,6 +81,12 @@ public class GremlinTemplate implements GremlinOperations, ApplicationContextAwa
 
     public ApplicationContext getApplicationContext() {
         return this.context;
+    }
+
+    public void clearDomainCache()
+    {
+        this.idToDomainEdges.clear();
+        this.idToDomainVertices.clear();
     }
 
     @Override
@@ -85,24 +104,48 @@ public class GremlinTemplate implements GremlinOperations, ApplicationContextAwa
 
     @NonNull
     private List<Result> executeQuery(@NonNull List<String> queries) {
-        final List<List<String>> parallelQueries = GremlinUtils.toParallelQueryList(queries);
-
-        return parallelQueries.stream().flatMap(q -> executeQueryParallel(q).stream()).collect(Collectors.toList());
+        return executeQueryUsingExecutorService(queries);
+//        final List<List<String>> parallelQueries = GremlinUtils.toParallelQueryList(queries);
+//
+//        return parallelQueries.stream().flatMap(q -> executeQueryExecutor(q).stream()).collect(Collectors.toList());
     }
+
+//    @NonNull
+//    private List<Result> executeQueryParallel(@NonNull List<String> queries) {
+//        return queries.parallelStream()
+//                .map(q -> getGremlinClient().submit(q).all())
+//                .collect(toList()).parallelStream().flatMap(f -> {
+//                    try {
+//                        return f.get().stream();
+//                    } catch (InterruptedException | ExecutionException e) {
+//                        throw new GremlinQueryException("unable to complete query from gremlin", e);
+//                    }
+//                }).collect(toList());
+//    }
+
 
     @NonNull
-    private List<Result> executeQueryParallel(@NonNull List<String> queries) {
-        return queries.parallelStream()
-                .map(q -> getGremlinClient().submit(q).all())
-                .collect(toList()).parallelStream().flatMap(f -> {
-                    try {
-                        return f.get().stream();
-                    } catch (InterruptedException | ExecutionException e) {
-                        throw new GremlinQueryException("unable to complete query from gremlin", e);
-                    }
-                }).collect(toList());
-    }
+    protected List<Result> executeQueryUsingExecutorService(@NonNull List<String> queries) {
+        final List<CompletableFuture<List<Result>>> futures =
+            queries.stream()
+                .map(query -> CompletableFuture.supplyAsync(() ->
+                {
+                    logger.info("Thread: {}, Executing Query: {}",
+                        Thread.currentThread().getName(),
+                        query);
+                    return this.getGremlinClient().submit(query).all().join();
+                }, executor))
+                .collect(Collectors.toList());
 
+        final List<List<Result>> collect =
+            futures.stream().map(CompletableFuture::join)
+                .collect(Collectors.toList());
+
+        final List<Result> results = new ArrayList<>(queries.size());
+        collect.forEach(resultList -> results.addAll(resultList));
+
+        return results;
+    }
 
     /**
      * This method execuates a query expected to return a long value.
@@ -179,7 +222,7 @@ public class GremlinTemplate implements GremlinOperations, ApplicationContextAwa
         return this.findById(id, domainClass);
     }
 
-    private Object getEdgeAnnotatedFieldValue(@NonNull Field field, @NonNull Object vertexId) {
+    protected Object getEdgeAnnotatedFieldValue(@NonNull Field field, @NonNull Object vertexId) {
         if (field.getType() == String.class || field.getType() == Long.class || field.getType() == Integer.class) {
             return vertexId;
         } else if (field.getType().isPrimitive()) {
@@ -206,6 +249,9 @@ public class GremlinTemplate implements GremlinOperations, ApplicationContextAwa
      * This function will do that and make edge domain completion.
      */
     protected <T> void completeEdge(@NonNull T domain, @NonNull GremlinSourceEdge source) {
+        final Object cachedSourceVertex = this.idToDomainVertices.get(source.getVertexIdFrom());
+        final Object cachedTargetVertex = this.idToDomainVertices.get(source.getVertexIdTo());
+
         final ConvertingPropertyAccessor accessor = this.mappingConverter.getPropertyAccessor(domain);
         final GremlinPersistentEntity persistentEntity = this.mappingConverter.getPersistentEntity(domain.getClass());
 
@@ -218,8 +264,10 @@ public class GremlinTemplate implements GremlinOperations, ApplicationContextAwa
         Assert.notNull(propertyFrom, "persistence property should not be null");
         Assert.notNull(propertyTo, "persistence property should not be null");
 
-        accessor.setProperty(propertyFrom, this.getEdgeAnnotatedFieldValue(fromField, source.getVertexIdFrom()));
-        accessor.setProperty(propertyTo, this.getEdgeAnnotatedFieldValue(toField, source.getVertexIdTo()));
+        accessor.setProperty(propertyFrom, cachedSourceVertex == null ?
+            this.getEdgeAnnotatedFieldValue(fromField, source.getVertexIdFrom()) : cachedSourceVertex);
+        accessor.setProperty(propertyTo, cachedTargetVertex == null ?
+            this.getEdgeAnnotatedFieldValue(toField, source.getVertexIdTo()) : cachedTargetVertex);
     }
 
     @Override
@@ -234,28 +282,44 @@ public class GremlinTemplate implements GremlinOperations, ApplicationContextAwa
     }
 
     @Override
-    public <T> T findById(@NonNull Object id, @NonNull Class<T> domainClass) {
-        @SuppressWarnings("unchecked") final GremlinEntityInformation info = GremlinEntityInformation.get(domainClass);
+    public <T> T findById(@NonNull Object id, @NonNull Class<T> domainClass)
+    {
+        @SuppressWarnings("unchecked") final GremlinEntityInformation info =
+            GremlinEntityInformation.get(domainClass);
         final GremlinSource source = info.getGremlinSource();
 
-        if (info.isEntityGraph()) {
+        if (info.isEntityGraph())
+        {
             throw new UnsupportedOperationException("Gremlin graph cannot be findById.");
         }
 
-        Assert.isTrue(info.isEntityEdge() || info.isEntityVertex(), "only accept vertex or edge");
+        Assert.isTrue(info.isEntityEdge() || info.isEntityVertex(),
+            "only accept vertex or edge");
 
-        source.setId(id);
+        final Object cachedInstance =
+            info.isEntityEdge() ? idToDomainEdges.get(id) : idToDomainVertices.get(id);
 
-        final List<String> queryList = source.getGremlinScriptLiteral().generateFindByIdScript(source);
-        final List<Result> results = this.executeQuery(queryList);
+        if (cachedInstance == null)
+        {
+            source.setId(id);
 
-        if (results.isEmpty()) {
-            return null;
+            final List<String> queryList =
+                source.getGremlinScriptLiteral().generateFindByIdScript(source);
+            final List<Result> results = this.executeQuery(queryList);
+
+            if (results.isEmpty())
+            {
+                return null;
+            }
+
+            Assert.isTrue(results.size() == 1, "should be only one domain with given id");
+
+            return this.recoverDomain(source, results.get(0), domainClass, info.isEntityEdge());
         }
-
-        Assert.isTrue(results.size() == 1, "should be only one domain with given id");
-
-        return this.recoverDomain(source, results.get(0), domainClass, info.isEntityEdge());
+        else
+        {
+            return (T) cachedInstance;
+        }
     }
 
     protected <T> T updateInternal(@NonNull T object, @NonNull GremlinEntityInformation information) {
@@ -387,7 +451,7 @@ public class GremlinTemplate implements GremlinOperations, ApplicationContextAwa
     }
 
 
-    private <T> T recoverDomain(@NonNull GremlinSource source, @NonNull Result result,
+    protected <T> T recoverDomain(@NonNull GremlinSource source, @NonNull Result result,
                                 @NonNull Class<T> domainClass, boolean isEntityEdge) {
         final T domain;
 
@@ -396,12 +460,17 @@ public class GremlinTemplate implements GremlinOperations, ApplicationContextAwa
 
         if (isEntityEdge) {
             this.completeEdge(domain, (GremlinSourceEdge) source);
+
+            idToDomainEdges.put(source.getId(), domain);
+        }
+        else {
+            idToDomainVertices.put(source.getId(), domain);
         }
 
         return domain;
     }
 
-    private <T> List<T> recoverDomainList(@NonNull GremlinSource source, @NonNull List<Result> results,
+    protected <T> List<T> recoverDomainList(@NonNull GremlinSource source, @NonNull List<Result> results,
                                           @NonNull Class<T> domainClass, boolean isEntityEdge) {
         final List<T> domainList = new ArrayList<>();
 
@@ -412,17 +481,23 @@ public class GremlinTemplate implements GremlinOperations, ApplicationContextAwa
 
     @Override
     public <T> List<T> find(@NonNull GremlinQuery query, @NonNull Class<T> domainClass) {
-        @SuppressWarnings("unchecked") final GremlinEntityInformation info = GremlinEntityInformation.get(domainClass);
-        final GremlinSource source = info.getGremlinSource();
+        if (query.getScriptGenerator() == null) {
+            query.setScriptGenerator(new QueryFindScriptGenerator());
+        }
 
-        query.setScriptGenerator(new QueryFindScriptGenerator());
+        return this.find(query.doSentenceGenerate(domainClass), domainClass);
+    }
 
-        final List<String> queryList = query.doSentenceGenerate(domainClass);
+
+    public <T> List<T> find(@NonNull List<String> queryList, @NonNull Class<T> domainClass) {
         final List<Result> results = this.executeQuery(queryList);
 
         if (results.isEmpty()) {
             return Collections.emptyList();
         }
+
+        final GremlinEntityInformation info = GremlinEntityInformation.get(domainClass);
+        final GremlinSource source = info.getGremlinSource();
 
         return this.recoverDomainList(source, results, domainClass, info.isEntityEdge());
     }
