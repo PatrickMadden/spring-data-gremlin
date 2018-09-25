@@ -81,7 +81,7 @@ public class MappingGremlinConverter
         return mappingContext.getPersistentEntity(domainClass);
     }
 
-    private String getIdFieldName(@NonNull Object domain) {
+    protected String getIdFieldName(@NonNull Object domain) {
         return GremlinUtils.getIdField(domain.getClass()).getName();
     }
 
@@ -112,8 +112,7 @@ public class MappingGremlinConverter
      * @param cls The domain implementation representing a vertex or edge.
      * @return All persistent {@link Field} instances for a given domain class.
      */
-    public Field[] getAllFields(Class<?> cls)
-    {
+    public Field[] getAllFields(Class<?> cls) {
         return FieldUtils.getAllFields(cls);
     }
 }
