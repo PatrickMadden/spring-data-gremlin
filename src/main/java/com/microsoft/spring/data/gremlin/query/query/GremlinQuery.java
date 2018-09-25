@@ -5,26 +5,43 @@
  */
 package com.microsoft.spring.data.gremlin.query.query;
 
-import com.microsoft.spring.data.gremlin.query.criteria.Criteria;
-import lombok.*;
-import org.springframework.util.Assert;
 
+import com.microsoft.spring.data.gremlin.query.criteria.Criteria;
+import org.springframework.util.Assert;
 import java.util.List;
+
+import lombok.Getter;
+import lombok.NonNull;
+import lombok.Setter;
+
 
 public class GremlinQuery {
 
     @Getter
+    @Setter
     private final Criteria criteria;
-
-    @Setter(AccessLevel.PRIVATE)
     private QueryScriptGenerator generator;
 
-    public GremlinQuery(@NonNull Criteria criteria) {
-        this.criteria = criteria;
+    public GremlinQuery(QueryScriptGenerator generator)
+    {
+        this(null, generator);
     }
 
-    public void setScriptGenerator(@NonNull QueryScriptGenerator generator) {
-        this.setGenerator(generator);
+    public GremlinQuery(Criteria criteria) {
+        this(criteria, null);
+    }
+
+    public GremlinQuery(Criteria criteria, QueryScriptGenerator generator) {
+        this.criteria = criteria;
+        this.generator = generator;
+    }
+
+    public void setScriptGenerator(QueryScriptGenerator generator) {
+        this.generator = generator;
+    }
+
+    public QueryScriptGenerator getScriptGenerator() {
+        return this.generator;
     }
 
     public <T> List<String> doSentenceGenerate(@NonNull Class<T> domainClass) {
