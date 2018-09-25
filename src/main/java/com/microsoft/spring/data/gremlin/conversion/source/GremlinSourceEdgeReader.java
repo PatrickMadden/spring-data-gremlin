@@ -5,21 +5,21 @@
  */
 package com.microsoft.spring.data.gremlin.conversion.source;
 
+
 import com.microsoft.spring.data.gremlin.annotation.EdgeFrom;
 import com.microsoft.spring.data.gremlin.annotation.EdgeTo;
 import com.microsoft.spring.data.gremlin.common.GremlinUtils;
 import com.microsoft.spring.data.gremlin.conversion.MappingGremlinConverter;
 import com.microsoft.spring.data.gremlin.exception.GremlinUnexpectedSourceTypeException;
 import com.microsoft.spring.data.gremlin.mapping.GremlinPersistentEntity;
-import lombok.NoArgsConstructor;
-import org.apache.commons.lang3.reflect.FieldUtils;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mapping.PersistentProperty;
 import org.springframework.data.mapping.model.ConvertingPropertyAccessor;
 import org.springframework.lang.NonNull;
 import org.springframework.util.Assert;
-
 import java.lang.reflect.Field;
+
+import lombok.NoArgsConstructor;
 
 import static com.microsoft.spring.data.gremlin.common.Constants.PROPERTY_ID;
 
@@ -37,7 +37,7 @@ public class GremlinSourceEdgeReader extends AbstractGremlinSourceReader impleme
        final ConvertingPropertyAccessor accessor = converter.getPropertyAccessor(domain);
        final GremlinPersistentEntity persistentEntity = converter.getPersistentEntity(type);
 
-       for (final Field field : FieldUtils.getAllFields(type)) {
+       for (final Field field : converter.getAllFields(type)) {
            final PersistentProperty property = persistentEntity.getPersistentProperty(field.getName());
 
            if (property != null) {
