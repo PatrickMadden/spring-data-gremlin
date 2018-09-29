@@ -83,8 +83,7 @@ public class GremlinTemplate implements GremlinOperations, ApplicationContextAwa
         return this.context;
     }
 
-    public void clearDomainCache()
-    {
+    public void clearDomainCache() {
         this.idToDomainEdges.clear();
         this.idToDomainVertices.clear();
     }
@@ -282,14 +281,12 @@ public class GremlinTemplate implements GremlinOperations, ApplicationContextAwa
     }
 
     @Override
-    public <T> T findById(@NonNull Object id, @NonNull Class<T> domainClass)
-    {
+    public <T> T findById(@NonNull Object id, @NonNull Class<T> domainClass) {
         @SuppressWarnings("unchecked") final GremlinEntityInformation info =
             GremlinEntityInformation.get(domainClass);
         final GremlinSource source = info.getGremlinSource();
 
-        if (info.isEntityGraph())
-        {
+        if (info.isEntityGraph()) {
             throw new UnsupportedOperationException("Gremlin graph cannot be findById.");
         }
 
@@ -299,8 +296,7 @@ public class GremlinTemplate implements GremlinOperations, ApplicationContextAwa
         final Object cachedInstance =
             info.isEntityEdge() ? idToDomainEdges.get(id) : idToDomainVertices.get(id);
 
-        if (cachedInstance == null)
-        {
+        if (cachedInstance == null) {
             source.setId(id);
 
             final List<String> queryList =
@@ -316,8 +312,7 @@ public class GremlinTemplate implements GremlinOperations, ApplicationContextAwa
 
             return this.recoverDomain(source, results.get(0), domainClass, info.isEntityEdge());
         }
-        else
-        {
+        else {
             return (T) cachedInstance;
         }
     }

@@ -32,6 +32,8 @@ public class Criteria {
         switch (type) {
             case AND:
             case OR:
+            case INV:
+            case OUTV:
                 return true;
             default:
                 return false;
@@ -68,11 +70,6 @@ public class Criteria {
     }
 
 
-    public static Criteria getOutVInstance()
-    {
-        return new Criteria(CriteriaType.OUTV);
-    }
-
     public static Criteria getOutEdgeInstance(String label)
     {
         final Criteria criteria = new Criteria(CriteriaType.OUTE);
@@ -101,6 +98,35 @@ public class Criteria {
 
         return criteria;
     }
+
+	/**
+	 * Multivalent OR operation.
+	 * @param values A list of one or more values for a given subject to be OR'd.
+	 * @return A multivalent OR criteria.
+	 */
+    public static Criteria getOrInstance(@NonNull String subject, @NonNull List<Object> values) {
+        final Criteria criteria = new Criteria(CriteriaType.OR);
+
+        criteria.subject = subject;
+        criteria.subValues = values;
+
+        return criteria;
+    }
+
+
+	/**
+	 * Multivalent AND operation.
+	 * <li>Produces where(and(traversalScript, traversalScript...))</li>
+	 * @param subCriteria A list of one or more criteria to be AND
+	 * @return A multivalent AND criteria.
+	 */
+	public static Criteria getAndInstance(@NonNull List<Criteria> subCriteria) {
+        final Criteria criteria = new Criteria(CriteriaType.AND);
+        criteria.subCriteria.addAll(subCriteria);
+
+        return criteria;
+    }
+
 
     public static Criteria getBinaryInstance(CriteriaType type, @NonNull Criteria left, @NonNull Criteria right) {
         Assert.isTrue(isBinaryOperation(type), "type should be Binary operation");

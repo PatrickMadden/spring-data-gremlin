@@ -11,6 +11,7 @@ import com.microsoft.spring.data.gremlin.query.criteria.Criteria;
 import com.microsoft.spring.data.gremlin.query.criteria.CriteriaType;
 import com.microsoft.spring.data.gremlin.repository.support.GremlinEntityInformation;
 import org.springframework.lang.NonNull;
+import org.springframework.util.Assert;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -45,9 +46,9 @@ public class QueryFindScriptGenerator implements QueryScriptGenerator {
         final String subject = getCriteriaSubject(criteria);
 
         if (subject.equals(PROPERTY_ID)) {
-            return String.format(GREMLIN_PRIMITIVE_WHERE, generateHasId(criteria.getSubValues().get(0).toString()));
+            return String.format(GREMLIN_PRIMITIVE_WHERE, generateHasId(criteria.getSubValues()));
         } else {
-            return String.format(GREMLIN_PRIMITIVE_WHERE, generateHas(subject, criteria.getSubValues().get(0)));
+            return String.format(GREMLIN_PRIMITIVE_WHERE, generateHas(subject, criteria.getSubValues()));
         }
     }
 
@@ -62,9 +63,61 @@ public class QueryFindScriptGenerator implements QueryScriptGenerator {
                 this.generateScriptTraversal(criteria.getSubCriteria().get(0)));
     }
 
+    /**
+     * Generates a where(or(has(subject, value1),...,has(subject, valueN))) based on the subject and values of the
+     * @param criteria
+     * @return
+     */
+    public String generateOr(@NonNull Criteria criteria) {
+        //where(or(has(id, '1458678'), has(id, '1723881'), has(id, '8595585')))
+        Assert.notEmpty(criteria.getSubValues(),
+            "OR criteria sub values can't be empty");
+
+        final String subject = this.getCriteriaSubject(criteria);
+        final List<String> hasList = new ArrayList<>();
+
+        if (subject.equals(PROPERTY_ID)) {
+            criteria.getSubValues().forEach(
+                value -> hasList.add(generateHasId(value.toString())));
+        } else {
+            criteria.getSubValues().forEach(
+                value -> hasList.add(generateHas(subject, value)));
+        }
+
+        return String.format("where(or(%s))",
+            String.join(",", hasList));
+    }
+
+    /**
+     * Generates a where(and(where(has(subject, value1)),...,where(has(subject, valueN))))
+     * based on the subject and values of the input criteria.
+     * @param criteria The input {@link Criteria}
+     * @return The generated script.
+     */
+    public String generateAnd(@NonNull Criteria criteria) {
+        //where(or(has(id, '1458678'), has(id, '1723881'), has(id, '8595585')))
+        Assert.notEmpty(criteria.getSubCriteria(),
+            "AND sub criteria values can't be empty");
+
+        final List<String> subCriteriaTraversal = new ArrayList<>();
+
+        criteria.getSubCriteria().forEach(
+            subCriteria -> {
+                subCriteriaTraversal.add(
+                    this.generateScriptTraversal(subCriteria));
+            });
+
+        return String.format("where(and(%s))",
+            String.join(",", subCriteriaTraversal));
+    }
 
     public String generateInVScript(@NonNull Criteria criteria) {
-        return GREMLIN_PRIMITIVE_INV;
+        final String left =
+            this.generateScriptTraversal(criteria.getSubCriteria().get(0));
+        final String right =
+            this.generateScriptTraversal(criteria.getSubCriteria().get(1));
+
+        return this.generateCombinedScript(left, right, criteria.getType());
     }
 
     public String generateOutVScript(@NonNull Criteria criteria) {
@@ -154,11 +207,27 @@ public class QueryFindScriptGenerator implements QueryScriptGenerator {
             case NOT:
                 return this.generateNot(criteria);
             case AND:
-            case OR:
-                final String left = this.generateScriptTraversal(criteria.getSubCriteria().get(0));
-                final String right = this.generateScriptTraversal(criteria.getSubCriteria().get(1));
+                if (criteria.getSubCriteria().size() == 2) {
+                    final String left =
+                        this.generateScriptTraversal(criteria.getSubCriteria().get(0));
+                    final String right =
+                        this.generateScriptTraversal(criteria.getSubCriteria().get(1));
 
-                return this.generateCombinedScript(left, right, type);
+                    return this.generateCombinedScript(left, right, type);
+                } else {
+                    return generateAnd(criteria);
+                }
+            case OR:
+                if (criteria.getSubCriteria().size() == 2) {
+                    final String left =
+                        this.generateScriptTraversal(criteria.getSubCriteria().get(0));
+                    final String right =
+                        this.generateScriptTraversal(criteria.getSubCriteria().get(1));
+
+                    return this.generateCombinedScript(left, right, type);
+                } else {
+                    return generateOr(criteria);
+                }
             case AFTER:
             case BEFORE:
                 return this.generateSingleScript(criteria);

@@ -5,15 +5,16 @@
  */
 package com.microsoft.spring.data.gremlin.conversion.script;
 
+
 import com.microsoft.spring.data.gremlin.common.GremlinEntityType;
 import com.microsoft.spring.data.gremlin.common.GremlinUtils;
 import com.microsoft.spring.data.gremlin.exception.GremlinInvalidEntityIdFieldException;
 import com.microsoft.spring.data.gremlin.exception.GremlinUnexpectedEntityTypeException;
-import lombok.NonNull;
 import org.apache.tinkerpop.shaded.jackson.core.JsonProcessingException;
 import org.springframework.util.Assert;
-
 import java.util.*;
+
+import lombok.NonNull;
 
 import static com.microsoft.spring.data.gremlin.common.Constants.*;
 
@@ -67,9 +68,40 @@ public abstract class AbstractGremlinScriptLiteral {
         return String.format("has(label, '%s')", label);
     }
 
-    public static String generateHasId(@NonNull String label) {
-        return String.format("has(id, '%s')", label);
+    public static String generateHasId(@NonNull String id) {
+        return String.format("has(id, '%s')", id);
     }
+
+    public static String generateHasId(@NonNull List<Object> ids) {
+        final List<String> hasIds = new ArrayList<>(ids.size());
+
+        ids.forEach(id -> hasIds.add(generateHasId(id.toString())));
+
+        return generateHasShared(hasIds);
+    }
+
+
+    protected static String generateHasShared(List<String> hasInputs)
+    {
+        final int listSize = hasInputs.size();
+        String hasFragment;
+
+        if (listSize == 1) {
+            hasFragment = hasInputs.get(0);
+        } else if (listSize == 2) {
+            hasFragment = String.join(".or().", hasInputs);
+        } else {
+            final List<String> whereHasList = new ArrayList<>(hasInputs.size());
+
+            hasInputs.forEach(hasFrag -> whereHasList.add(
+                String.format(GREMLIN_PRIMITIVE_WHERE, hasFrag)));
+
+            hasFragment = String.join(".or().", whereHasList);
+        }
+
+        return hasFragment;
+    }
+
 
     private static String generateProperty(@NonNull String name, @NonNull String value) {
         return String.format(GREMLIN_PRIMITIVE_PROPERTY_STRING, name, value);
@@ -193,6 +225,15 @@ public abstract class AbstractGremlinScriptLiteral {
 
     private static String generateHas(@NonNull String name, @NonNull Long value) {
         return String.format(GREMLIN_PRIMITIVE_HAS_NUMBER, name, value);
+    }
+
+    public static String generateHas(@NonNull String name, @NonNull List<Object> values) {
+        Assert.notEmpty(values, "Values must not be empty.");
+        final List<String> hasList = new ArrayList<>(values.size());
+
+        values.forEach(value -> hasList.add(generateHas(name, value)));
+
+       return generateHasShared(hasList);
     }
 
     // TODO: should move to query method part.
