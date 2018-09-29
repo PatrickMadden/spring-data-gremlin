@@ -99,11 +99,11 @@ public class Criteria {
         return criteria;
     }
 
-	/**
-	 * Multivalent OR operation.
-	 * @param values A list of one or more values for a given subject to be OR'd.
-	 * @return A multivalent OR criteria.
-	 */
+    /**
+     * Multivalent OR operation.
+     * @param values A list of one or more values for a given subject to be OR'd.
+     * @return A multivalent OR criteria.
+     */
     public static Criteria getOrInstance(@NonNull String subject, @NonNull List<Object> values) {
         final Criteria criteria = new Criteria(CriteriaType.OR);
 
@@ -113,14 +113,13 @@ public class Criteria {
         return criteria;
     }
 
-
-	/**
-	 * Multivalent AND operation.
-	 * <li>Produces where(and(traversalScript, traversalScript...))</li>
-	 * @param subCriteria A list of one or more criteria to be AND
-	 * @return A multivalent AND criteria.
-	 */
-	public static Criteria getAndInstance(@NonNull List<Criteria> subCriteria) {
+    /**
+     * Multivalent AND operation.
+     * <li>Produces where(and(traversalScript, traversalScript...))</li>
+     * @param subCriteria A list of one or more criteria to be AND
+     * @return A multivalent AND criteria.
+     */
+    public static Criteria getAndInstance(@NonNull List<Criteria> subCriteria) {
         final Criteria criteria = new Criteria(CriteriaType.AND);
         criteria.subCriteria.addAll(subCriteria);
 
