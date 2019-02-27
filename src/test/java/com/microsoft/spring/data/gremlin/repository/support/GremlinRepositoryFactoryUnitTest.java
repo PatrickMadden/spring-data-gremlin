@@ -5,6 +5,7 @@
  */
 package com.microsoft.spring.data.gremlin.repository.support;
 
+
 import com.microsoft.spring.data.gremlin.common.domain.Person;
 import com.microsoft.spring.data.gremlin.query.GremlinOperations;
 import org.junit.Assert;
@@ -15,10 +16,11 @@ import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.data.repository.core.EntityInformation;
-import org.springframework.data.repository.query.ExtensionAwareEvaluationContextProvider;
+import org.springframework.data.repository.query.Parameters;
 import org.springframework.data.repository.query.QueryLookupStrategy;
+import org.springframework.data.repository.query.QueryMethodEvaluationContextProvider;
+import org.springframework.expression.EvaluationContext;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-
 import java.util.Optional;
 
 @RunWith(SpringJUnit4ClassRunner.class)
@@ -53,7 +55,16 @@ public class GremlinRepositoryFactoryUnitTest {
     @Test
     public void testGetQueryLookupStrategy() {
         final Optional<QueryLookupStrategy> strategyOptional = this.factory.getQueryLookupStrategy(
-                QueryLookupStrategy.Key.CREATE, new ExtensionAwareEvaluationContextProvider());
+            QueryLookupStrategy.Key.CREATE, new QueryMethodEvaluationContextProvider()
+            {
+                @Override
+                public <T extends Parameters<?, ?>> EvaluationContext getEvaluationContext(
+                    T parameters,
+                    Object[] objects)
+                {
+                    return null;
+                }
+            });
 
         Assert.assertTrue(strategyOptional.isPresent());
     }

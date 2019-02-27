@@ -5,20 +5,20 @@
  */
 package com.microsoft.spring.data.gremlin.mapping;
 
+
 import org.springframework.context.ApplicationContext;
-import org.springframework.context.ApplicationContextAware;
 import org.springframework.data.mapping.context.AbstractMappingContext;
 import org.springframework.data.mapping.model.Property;
 import org.springframework.data.mapping.model.SimpleTypeHolder;
 import org.springframework.data.util.TypeInformation;
 
 public class GremlinMappingContext
-        extends AbstractMappingContext<BasicGremlinPersistentEntity<?>, GremlinPersistentProperty>
-        implements ApplicationContextAware {
+        extends AbstractMappingContext<BasicGremlinPersistentEntity<?>, GremlinPersistentProperty> {
     private ApplicationContext context;
 
     @Override
     public void setApplicationContext(ApplicationContext context) {
+        super.setApplicationContext(context);
         this.context = context;
     }
 

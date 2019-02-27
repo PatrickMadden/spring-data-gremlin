@@ -5,6 +5,7 @@
  */
 package com.microsoft.spring.data.gremlin.repository.support;
 
+
 import com.microsoft.spring.data.gremlin.query.GremlinOperations;
 import com.microsoft.spring.data.gremlin.query.query.GremlinQueryMethod;
 import com.microsoft.spring.data.gremlin.query.query.PartTreeGremlinQuery;
@@ -15,12 +16,12 @@ import org.springframework.data.repository.core.NamedQueries;
 import org.springframework.data.repository.core.RepositoryInformation;
 import org.springframework.data.repository.core.RepositoryMetadata;
 import org.springframework.data.repository.core.support.RepositoryFactorySupport;
-import org.springframework.data.repository.query.EvaluationContextProvider;
 import org.springframework.data.repository.query.QueryLookupStrategy;
+import org.springframework.data.repository.query.QueryMethodEvaluationContextProvider;
 import org.springframework.data.repository.query.RepositoryQuery;
 import org.springframework.lang.NonNull;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
-
 import java.io.Serializable;
 import java.lang.reflect.Method;
 import java.util.Optional;
@@ -53,8 +54,8 @@ public class GremlinRepositoryFactory extends RepositoryFactorySupport {
     }
 
     @Override
-    protected Optional<QueryLookupStrategy> getQueryLookupStrategy(QueryLookupStrategy.Key key,
-                                                                    EvaluationContextProvider provider) {
+    protected Optional<QueryLookupStrategy> getQueryLookupStrategy(
+        @Nullable QueryLookupStrategy.Key key, QueryMethodEvaluationContextProvider evaluationContextProvider) {
         return Optional.of(new GremlinQueryLookupStrategy(this.operations));
     }
 
