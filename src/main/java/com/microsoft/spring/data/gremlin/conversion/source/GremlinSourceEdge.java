@@ -5,15 +5,14 @@
  */
 package com.microsoft.spring.data.gremlin.conversion.source;
 
+
 import com.microsoft.spring.data.gremlin.conversion.result.GremlinResultEdgeReader;
 import com.microsoft.spring.data.gremlin.conversion.script.GremlinScriptLiteralEdge;
+
 import lombok.Getter;
 import lombok.Setter;
-import org.springframework.lang.NonNull;
 
-import java.lang.reflect.Field;
-
-public class GremlinSourceEdge extends AbstractGremlinSource {
+public class GremlinSourceEdge<T> extends AbstractGremlinSource<T> {
 
     @Getter
     @Setter
@@ -25,15 +24,18 @@ public class GremlinSourceEdge extends AbstractGremlinSource {
 
     public GremlinSourceEdge() {
         super();
+        initializeGremlinStrategy();
+    }
+
+    public GremlinSourceEdge(Class<T> domainClass) {
+        super(domainClass);
+        initializeGremlinStrategy();
+    }
+
+    private void initializeGremlinStrategy() {
         this.setGremlinScriptStrategy(new GremlinScriptLiteralEdge());
         this.setGremlinResultReader(new GremlinResultEdgeReader());
         this.setGremlinSourceReader(new GremlinSourceEdgeReader());
         this.setGremlinSourceWriter(new GremlinSourceEdgeWriter());
-    }
-
-    public GremlinSourceEdge(@NonNull Field idField, @NonNull String label) {
-        this();
-        super.setIdField(idField);
-        super.setLabel(label);
     }
 }

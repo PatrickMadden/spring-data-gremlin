@@ -10,6 +10,8 @@ import com.microsoft.spring.data.gremlin.annotation.EdgeFrom;
 import com.microsoft.spring.data.gremlin.annotation.EdgeTo;
 import com.microsoft.spring.data.gremlin.common.Constants;
 import com.microsoft.spring.data.gremlin.conversion.MappingGremlinConverter;
+import com.microsoft.spring.data.gremlin.exception.GremlinEntityInformationException;
+import com.microsoft.spring.data.gremlin.exception.GremlinInvalidEntityIdFieldException;
 import com.microsoft.spring.data.gremlin.exception.GremlinUnexpectedEntityTypeException;
 import com.microsoft.spring.data.gremlin.exception.GremlinUnexpectedSourceTypeException;
 import com.microsoft.spring.data.gremlin.mapping.GremlinPersistentEntity;
@@ -21,6 +23,8 @@ import org.springframework.util.Assert;
 import java.lang.reflect.Field;
 
 import lombok.NoArgsConstructor;
+
+import static com.microsoft.spring.data.gremlin.common.Constants.GREMLIN_PROPERTY_CLASSNAME;
 
 @NoArgsConstructor
 public class GremlinSourceEdgeWriter implements GremlinSourceWriter {
@@ -37,7 +41,7 @@ public class GremlinSourceEdgeWriter implements GremlinSourceWriter {
 
     @Override
     public void write(@NonNull Object domain, @NonNull MappingGremlinConverter converter,
-                      @NonNull GremlinSource source) {
+                      @NonNull GremlinSource source) throws GremlinInvalidEntityIdFieldException {
         if (!(source instanceof GremlinSourceEdge)) {
             throw new GremlinUnexpectedSourceTypeException("should be the instance of GremlinSourceEdge");
         }
@@ -51,20 +55,44 @@ public class GremlinSourceEdgeWriter implements GremlinSourceWriter {
         for (final Field field : converter.getAllFields(domain.getClass())) {
             final PersistentProperty property = persistentEntity.getPersistentProperty(field.getName());
 
-            if (property != null) {
-               Assert.notNull(property, "persistence property should not be null");
+            if (property != null)
+            {
+                Assert.notNull(property, "persistence property should not be null");
 
                 final Object object = accessor.getProperty(property);
 
-                if (field.getName().equals(Constants.PROPERTY_ID) || field.getAnnotation(Id.class) != null) {
+                if (field.getName().equals(Constants.PROPERTY_ID) ||
+                    field.getAnnotation(Id.class) != null)
+                {
                     continue;
-                } else if (field.getAnnotation(EdgeFrom.class) != null) {
-                    sourceEdge.setVertexIdFrom(this.getIdValue(object, converter));
-                } else if (field.getAnnotation(EdgeTo.class) != null) {
-                    sourceEdge.setVertexIdTo(this.getIdValue(object, converter));
-                } else if (!field.getName().equals(Constants.PROPERTY_ID)) {
-                    source.setProperty(field.getName(), accessor.getProperty(property));
                 }
+                else if (field.getName().equals(GREMLIN_PROPERTY_CLASSNAME))
+                {
+                    throw new GremlinEntityInformationException(
+                        "Domain Cannot use pre-defined field name: "
+                            + GREMLIN_PROPERTY_CLASSNAME);
+                }
+                else if (field.getAnnotation(EdgeFrom.class) != null)
+                {
+                    final Object vertexId = this.getIdValue(object, converter);
+                    if (vertexId == null)
+                    {
+                        throw new GremlinInvalidEntityIdFieldException(
+                            "The vertex id for the from vertex cannot be null!");
+                    }
+                    sourceEdge.setVertexIdFrom(vertexId);
+                }
+                else if (field.getAnnotation(EdgeTo.class) != null)
+                {
+                    final Object vertexId = this.getIdValue(object, converter);
+                    if (vertexId == null)
+                    {
+                        throw new GremlinInvalidEntityIdFieldException(
+                            "The vertex id for the to vertex cannot be null!");
+                    }
+                    sourceEdge.setVertexIdTo(vertexId);
+                }
+                source.setProperty(field.getName(), accessor.getProperty(property));
             }
         }
     }

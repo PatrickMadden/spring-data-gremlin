@@ -5,29 +5,32 @@
  */
 package com.microsoft.spring.data.gremlin.conversion.source;
 
+
 import com.microsoft.spring.data.gremlin.common.GremlinUtils;
 import com.microsoft.spring.data.gremlin.exception.GremlinEntityInformationException;
 import com.microsoft.spring.data.gremlin.exception.GremlinUnexpectedEntityTypeException;
-import lombok.NonNull;
 import org.apache.tinkerpop.shaded.jackson.databind.JavaType;
 import org.apache.tinkerpop.shaded.jackson.databind.type.TypeFactory;
 import org.springframework.data.mapping.PersistentProperty;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
-
 import java.io.IOException;
 import java.lang.reflect.Field;
 import java.util.Date;
 
-public abstract class AbstractGremlinSourceReader {
-    protected static final int nullHashCode = "null".hashCode();
+import lombok.NonNull;
 
-    protected Object readProperty(@NonNull PersistentProperty property, @NonNull Object value) {
+public abstract class AbstractGremlinSourceReader {
+
+    protected Object readProperty(@NonNull PersistentProperty property, @Nullable Object value) {
         final Class<?> type = property.getTypeInformation().getType();
         final JavaType javaType = TypeFactory.defaultInstance().constructType(property.getType());
 
-        if (type == int.class || type == Integer.class || type == Boolean.class || type == boolean.class) {
-            return nullHashCode == value.hashCode() ? null : value;
-        } else if (type == String.class) {
+        if (value == null) {
+            return null;
+        } else if (type == int.class || type == Integer.class
+                || type == Boolean.class || type == boolean.class
+                || type == String.class) {
             return value;
         } else if (type == Date.class) {
             Assert.isTrue(value instanceof Long || value instanceof Integer || value instanceof String,
@@ -67,8 +70,12 @@ public abstract class AbstractGremlinSourceReader {
     }
 
     protected Object getGremlinSourceId(@NonNull GremlinSource source) {
+        if (!source.getId().isPresent()) {
+            return null;
+        }
+
+        final Object id = source.getId().get();
         final Field idField = source.getIdField();
-        final Object id = source.getId();
 
         if (idField.getType() == String.class) {
             return id.toString();

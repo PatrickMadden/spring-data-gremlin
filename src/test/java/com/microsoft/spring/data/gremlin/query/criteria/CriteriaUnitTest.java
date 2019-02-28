@@ -10,6 +10,7 @@ import com.microsoft.spring.data.gremlin.common.Constants;
 import com.microsoft.spring.data.gremlin.common.domain.Person;
 import com.microsoft.spring.data.gremlin.query.query.GremlinQuery;
 import com.microsoft.spring.data.gremlin.query.query.QueryFindScriptGenerator;
+import com.microsoft.spring.data.gremlin.repository.support.GremlinEntityInformation;
 import org.junit.Assert;
 import org.junit.Test;
 import java.util.ArrayList;
@@ -23,7 +24,7 @@ import static com.microsoft.spring.data.gremlin.query.criteria.CriteriaType.OR;
 public class CriteriaUnitTest {
 
     private static final String notResult =
-        "g.V().has(label, 'label-person').not(where(where(has('name', 'Patrick')).and().where(has(id, '12345'))))";
+        "g.V().has(label, 'label-person').not(where(where(has('name', 'Patrick')).and().where(hasId('12345'))))";
 
     @Test(expected = IllegalArgumentException.class)
     public void testGetUnaryInstanceException() {
@@ -53,14 +54,18 @@ public class CriteriaUnitTest {
         final Criteria c2 = Criteria.getUnaryInstance(IS_EQUAL, Constants.PROPERTY_ID, Arrays.asList("12345"));
         final Criteria notCriteria = Criteria.getNotInstance(Criteria.getBinaryInstance(CriteriaType.AND, c1, c2));
 
-        final QueryFindScriptGenerator findScriptGenerator = new QueryFindScriptGenerator();
+        final GremlinEntityInformation<Person, String> personInfo =
+            GremlinEntityInformation.get(Person.class);
+        final QueryFindScriptGenerator findScriptGenerator =
+            new QueryFindScriptGenerator(personInfo.getGremlinSource());
 
         final GremlinQuery query = new GremlinQuery(notCriteria);
-        final List<String> stringList = findScriptGenerator.generate(query, Person.class);
+        final List<String> stringList = findScriptGenerator.generate(query);
 
-        Assert.assertTrue(stringList.size() > 0);
+        Assert.assertEquals(stringList.size(),
+            1);
 
-        final String gremlinQuery = String.join(Constants.GREMLIN_PRIMITIVE_INVOKE, stringList);
+        final String gremlinQuery = stringList.get(0);
 
         Assert.assertEquals(gremlinQuery, notResult);
     }

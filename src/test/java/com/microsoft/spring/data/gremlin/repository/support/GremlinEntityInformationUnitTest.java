@@ -5,7 +5,7 @@
  */
 package com.microsoft.spring.data.gremlin.repository.support;
 
-import com.microsoft.spring.data.gremlin.common.GremlinEntityType;
+
 import com.microsoft.spring.data.gremlin.common.TestConstants;
 import com.microsoft.spring.data.gremlin.common.domain.Network;
 import com.microsoft.spring.data.gremlin.common.domain.Person;
@@ -15,12 +15,12 @@ import com.microsoft.spring.data.gremlin.conversion.source.GremlinSourceGraph;
 import com.microsoft.spring.data.gremlin.conversion.source.GremlinSourceVertex;
 import com.microsoft.spring.data.gremlin.exception.GremlinInvalidEntityIdFieldException;
 import com.microsoft.spring.data.gremlin.exception.GremlinUnexpectedEntityTypeException;
-import lombok.Data;
 import org.junit.Assert;
 import org.junit.Test;
 import org.springframework.data.annotation.Id;
-
 import java.util.Date;
+
+import lombok.Data;
 
 public class GremlinEntityInformationUnitTest {
 
@@ -32,8 +32,6 @@ public class GremlinEntityInformationUnitTest {
         Assert.assertNotNull(personInfo.getIdField());
         Assert.assertEquals(personInfo.getId(person), TestConstants.VERTEX_PERSON_ID);
         Assert.assertEquals(personInfo.getIdType(), String.class);
-        Assert.assertEquals(personInfo.getEntityLabel(), TestConstants.VERTEX_PERSON_LABEL);
-        Assert.assertEquals(personInfo.getEntityType(), GremlinEntityType.VERTEX);
         Assert.assertTrue(personInfo.getGremlinSource() instanceof GremlinSourceVertex);
     }
 
@@ -43,8 +41,6 @@ public class GremlinEntityInformationUnitTest {
                 new GremlinEntityInformation<Relationship, String>(Relationship.class);
 
         Assert.assertNotNull(relationshipInfo.getIdField());
-        Assert.assertEquals(relationshipInfo.getEntityLabel(), TestConstants.EDGE_RELATIONSHIP_LABEL);
-        Assert.assertEquals(relationshipInfo.getEntityType(), GremlinEntityType.EDGE);
         Assert.assertTrue(relationshipInfo.getGremlinSource() instanceof GremlinSourceEdge);
     }
 
@@ -53,34 +49,32 @@ public class GremlinEntityInformationUnitTest {
         final GremlinEntityInformation networkInfo = new GremlinEntityInformation<Network, String>(Network.class);
 
         Assert.assertNotNull(networkInfo.getIdField());
-        Assert.assertNull(networkInfo.getEntityLabel());
-        Assert.assertEquals(networkInfo.getEntityType(), GremlinEntityType.GRAPH);
         Assert.assertTrue(networkInfo.getGremlinSource() instanceof GremlinSourceGraph);
     }
 
     @Test(expected = GremlinUnexpectedEntityTypeException.class)
     public void testEntityInformationException() {
-        new GremlinEntityInformation<TestDomain, String>(TestDomain.class);
+        GremlinEntityInformation.get(TestDomain.class).getGremlinSource();
     }
 
     @Test(expected = GremlinInvalidEntityIdFieldException.class)
     public void testEntityInformationNoIdException() {
-        new GremlinEntityInformation<TestNoIdDomain, String>(TestNoIdDomain.class);
+        GremlinEntityInformation.get(TestNoIdDomain.class);
     }
 
     @Test(expected = GremlinInvalidEntityIdFieldException.class)
     public void testEntityInformationMultipleIdException() {
-        new GremlinEntityInformation<TestMultipleIdDomain, String>(TestMultipleIdDomain.class);
+        GremlinEntityInformation.get(TestMultipleIdDomain.class);
     }
 
     @Test(expected = GremlinInvalidEntityIdFieldException.class)
     public void testEntityInformationNoStringIdException() {
-        new GremlinEntityInformation<TestNoStringIdDomain, String>(TestNoStringIdDomain.class);
+        GremlinEntityInformation.get(TestNoStringIdDomain.class);
     }
 
     @Test(expected = GremlinInvalidEntityIdFieldException.class)
     public void testEntityInformationIdFieldAndIdAnnotation() {
-        new GremlinEntityInformation<TestIdFieldAndIdAnnotation, String>(TestIdFieldAndIdAnnotation.class);
+        GremlinEntityInformation.get(TestIdFieldAndIdAnnotation.class);
     }
 
     @Data

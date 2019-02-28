@@ -5,13 +5,16 @@
  */
 package com.microsoft.spring.data.gremlin.common.domain;
 
+
 import com.microsoft.spring.data.gremlin.annotation.Vertex;
+import com.microsoft.spring.data.gremlin.common.TestConstants;
+
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Data
-@Vertex
+@Vertex(label = TestConstants.VERTEX_LABEL)
 @AllArgsConstructor
 @NoArgsConstructor
 public class Student {

@@ -5,6 +5,7 @@
  */
 package com.microsoft.spring.data.gremlin.conversion.script;
 
+
 import com.microsoft.spring.data.gremlin.common.domain.Person;
 import com.microsoft.spring.data.gremlin.conversion.MappingGremlinConverter;
 import com.microsoft.spring.data.gremlin.conversion.source.GremlinSource;
@@ -18,7 +19,6 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.context.ApplicationContext;
-
 import java.util.List;
 
 import static org.junit.Assert.assertEquals;
@@ -43,55 +43,52 @@ public class GremlinScriptLiteralVertexUnitTest {
 
         final Person person = new Person("123", "bill");
         @SuppressWarnings("unchecked") final GremlinEntityInformation info = GremlinEntityInformation.get(Person.class);
-        gremlinSource = info.getGremlinSource();
+        this.gremlinSource = info.getGremlinSource();
         this.converter.write(person, gremlinSource);
     }
 
     @Test
     public void testGenerateCountScript() {
-        final String query = new GremlinScriptLiteralVertex().generateCountScript(gremlinSource);
-        assertEquals(query, "g.V().count()");
-    }
-
-    @Test
-    public void testGenerateCountLabelScript() {
-        final String query = new GremlinScriptLiteralVertex().generateCountLabelScript(gremlinSource);
-        assertEquals(query, "g.V().has(label, 'label-person').count()");
+        final List<String> queryList = new GremlinScriptLiteralVertex().generateCountScript(gremlinSource);
+        assertEquals(queryList.get(0), "g.V()");
     }
 
     @Test
     public void testGenerateFindByIdScript() {
         final List<String> queryList = new GremlinScriptLiteralVertex().generateFindByIdScript(gremlinSource);
-        assertEquals(queryList.get(0), "g.V('123')");
+        assertEquals(queryList.get(0), "g.V().hasId('123')");
     }
 
     @Test
     public void testGenerateFindAllScript() {
         final List<String> queryList = new GremlinScriptLiteralVertex().generateFindAllScript(gremlinSource);
-        assertEquals(queryList.get(0), "g.V().has(label, 'label-person')");
+        assertEquals(queryList.get(0), "g.V().has(label, 'label-person')" +
+                ".has('_classname', 'com.microsoft.spring.data.gremlin.common.domain.Person')");
     }
 
     @Test
     public void testGenerateInsertScript() {
         final List<String> queryList = new GremlinScriptLiteralVertex().generateInsertScript(gremlinSource);
-        assertEquals(queryList.get(0), "g.addV('label-person').property(id, '123').property('name', 'bill')");
+        assertEquals(queryList.get(0), "g.addV('label-person').property(id, '123').property('name', 'bill')" +
+                ".property('_classname', 'com.microsoft.spring.data.gremlin.common.domain.Person')");
     }
 
     @Test
     public void testGenerateUpdateScript() {
         final List<String> queryList = new GremlinScriptLiteralVertex().generateUpdateScript(gremlinSource);
-        assertEquals(queryList.get(0), "g.V('123').property(single, 'name', 'bill')");
+        assertEquals(queryList.get(0), "g.V('123').property('name', 'bill')" +
+                ".property('_classname', 'com.microsoft.spring.data.gremlin.common.domain.Person')");
     }
 
     @Test
     public void testGenerateDeleteByIdScript() {
         final List<String> queryList = new GremlinScriptLiteralVertex().generateDeleteByIdScript(gremlinSource);
-        assertEquals(queryList.get(0), "g.V('123').drop()");
+        assertEquals(queryList.get(0), "g.V().hasId('123').drop()");
     }
 
     @Test
     public void testGenerateDeleteAllScript() {
-        final List<String> queryList = new GremlinScriptLiteralVertex().generateDeleteAllScript(gremlinSource);
+        final List<String> queryList = new GremlinScriptLiteralVertex().generateDeleteAllScript();
         assertEquals(queryList.get(0), "g.V().drop()");
     }
 

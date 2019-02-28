@@ -24,17 +24,17 @@ import lombok.NoArgsConstructor;
 public class GremlinSourceVertexReader extends AbstractGremlinSourceReader implements GremlinSourceReader {
 
     @Override
-    public <T extends Object> T read(@NonNull Class<T> type, @NonNull MappingGremlinConverter converter,
-                                     @NonNull GremlinSource source) {
+    public <T extends Object> T read(@NonNull Class<T> domainClass, @NonNull MappingGremlinConverter converter,
+                                     @NonNull GremlinSource<T> source) {
         if (!(source instanceof GremlinSourceVertex)) {
             throw new GremlinUnexpectedSourceTypeException("should be instance of GremlinSourceVertex");
         }
 
-        final T domain = GremlinUtils.createInstance(type);
+        final T domain = GremlinUtils.createInstance(domainClass);
         final ConvertingPropertyAccessor accessor = converter.getPropertyAccessor(domain);
-        final GremlinPersistentEntity persistentEntity = converter.getPersistentEntity(type);
+        final GremlinPersistentEntity persistentEntity = converter.getPersistentEntity(domainClass);
 
-        for (final Field field : converter.getAllFields(type)) {
+        for (final Field field : converter.getAllFields(domainClass)) {
             final PersistentProperty property = persistentEntity.getPersistentProperty(field.getName());
 
             if (property != null) {

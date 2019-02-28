@@ -3,53 +3,76 @@
  * Licensed under the MIT License. See LICENSE in the project root for
  * license information.
  */
+
 package com.microsoft.spring.data.gremlin.query;
 
 
 import com.microsoft.spring.data.gremlin.common.GremlinEntityType;
 import com.microsoft.spring.data.gremlin.conversion.MappingGremlinConverter;
+import com.microsoft.spring.data.gremlin.conversion.source.GremlinSource;
 import com.microsoft.spring.data.gremlin.query.query.GremlinQuery;
-import org.springframework.lang.NonNull;
 import java.util.List;
+
 
 /**
  * Provider interface for basic Operations with Gremlin
  */
-public interface GremlinOperations {
+public interface GremlinOperations
+{
 
     void deleteAll();
 
+
     void deleteAll(GremlinEntityType type);
 
-    <T> void deleteAll(Class<T> domainClass);
 
-    <T> boolean isEmptyGraph(T object);
+    <T> void deleteAll(GremlinSource<T> source);
 
-    <T> void deleteById(Object id, Class<T> domainClass);
 
-    <T> T insert(T object);
+    <T> boolean isEmptyGraph(GremlinSource<T> source);
 
-    <T> T findById(Object id, Class<T> domainClass);
 
-    <T> T findVertexById(Object id, Class<T> domainClass);
+    <T> boolean existsById(Object id, GremlinSource<T> source);
 
-    <T> T findEdgeById(Object id, Class<T> domainClass);
 
-    <T> T update(T object);
+    <T> void deleteById(Object id, GremlinSource<T> source);
 
-    <T> T save(T object);
 
-    <T> List<T> findAll(Class<T> domainClass);
+    <T> T insert(T object, GremlinSource<T> source);
+
+
+    <T> T findById(Object id, GremlinSource<T> source);
+
+
+    <T> T findVertexById(Object id, GremlinSource<T> source);
+
+
+    <T> T findEdgeById(Object id, GremlinSource<T> source);
+
+
+    <T> T update(T object, GremlinSource<T> source);
+
+
+    <T> T save(T object, GremlinSource<T> source);
+
+
+    <T> List<T> findAll(GremlinSource<T> source);
+
 
     long vertexCount();
+
+
     <T> long vertexCount(Class<T> domainClass);
 
+
     long edgeCount();
+
+
     <T> long edgeCount(Class<T> domainClass);
 
-    <T> List<T> find(GremlinQuery query, Class<T> domainClass);
 
-    <T> List<T> find(@NonNull List<String> queryList, @NonNull Class<T> domainClass);
+    <T> List<T> find(GremlinQuery query, GremlinSource<T> source);
+
 
     MappingGremlinConverter getMappingConverter();
 }

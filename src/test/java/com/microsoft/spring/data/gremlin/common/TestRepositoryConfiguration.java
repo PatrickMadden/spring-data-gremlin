@@ -21,15 +21,11 @@ public class TestRepositoryConfiguration extends AbstractGremlinConfiguration {
 
     @Override
     public GremlinConfig getGremlinConfig() {
-        return new GremlinConfig(
-            testProps.getEndpoint(),
-            testProps.getPort(),
-            testProps.getUsername(),
-            testProps.getPassword(),
-            testProps.isTelemetryAllowed(),
-            testProps.isSslEnabled(),
-            testProps.getMaxContentLength(),
-            testProps.getMaxWaitForConnection(),
-            testProps.getSerializersName());
+        return GremlinConfig.builder(testProps.getEndpoint(), testProps.getUsername(), testProps.getPassword())
+                .port(testProps.getPort())
+                .telemetryAllowed(testProps.isTelemetryAllowed())
+                .sslEnabled(testProps.isSslEnabled())
+                .serializer(testProps.getSerializer())
+                .build();
     }
 }

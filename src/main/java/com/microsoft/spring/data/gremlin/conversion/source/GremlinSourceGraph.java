@@ -5,30 +5,39 @@
  */
 package com.microsoft.spring.data.gremlin.conversion.source;
 
+
+import com.microsoft.spring.data.gremlin.conversion.result.GremlinResultsGraphReader;
+import com.microsoft.spring.data.gremlin.conversion.result.GremlinResultsReader;
 import com.microsoft.spring.data.gremlin.conversion.script.GremlinScriptLiteralGraph;
 import com.microsoft.spring.data.gremlin.exception.GremlinUnexpectedSourceTypeException;
-import lombok.Getter;
-import org.springframework.lang.NonNull;
-
-import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
 
-public class GremlinSourceGraph extends AbstractGremlinSource {
+import lombok.Getter;
+
+public class GremlinSourceGraph<T> extends AbstractGremlinSource<T> {
 
     @Getter
-    private List<GremlinSource> vertexSet;
+    private List<GremlinSource> vertexSet = new ArrayList<>();
 
     @Getter
-    private List<GremlinSource> edgeSet;
+    private List<GremlinSource> edgeSet = new ArrayList<>();
+
+    @Getter
+    private GremlinResultsReader resultsReader;
 
     public GremlinSourceGraph() {
         super();
-        this.setGremlinScriptStrategy(new GremlinScriptLiteralGraph());
-        this.setGremlinSourceWriter(new GremlinSourceGraphWriter());
+        initializeGremlinStrategy();
+        this.setGremlinSourceReader(new GremlinSourceGraphReader());
+        this.resultsReader = new GremlinResultsGraphReader();
+    }
 
-        this.vertexSet = new ArrayList<>();
-        this.edgeSet = new ArrayList<>();
+    public GremlinSourceGraph(Class<T> domainClass) {
+        super(domainClass);
+        initializeGremlinStrategy();
+        this.setGremlinSourceReader(new GremlinSourceGraphReader());
+        this.resultsReader = new GremlinResultsGraphReader();
     }
 
     public void addGremlinSource(GremlinSource source) {
@@ -41,10 +50,9 @@ public class GremlinSourceGraph extends AbstractGremlinSource {
         }
     }
 
-    public GremlinSourceGraph(@NonNull Field idField, @NonNull String label) {
-        this();
-        super.setIdField(idField);
-        super.setLabel(label);
+    private void initializeGremlinStrategy() {
+        this.setGremlinScriptStrategy(new GremlinScriptLiteralGraph());
+        this.setGremlinSourceWriter(new GremlinSourceGraphWriter());
     }
 }
 

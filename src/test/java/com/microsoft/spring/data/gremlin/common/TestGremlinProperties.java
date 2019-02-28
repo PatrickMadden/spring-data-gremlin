@@ -35,5 +35,5 @@ public class TestGremlinProperties {
 
     private int maxWaitForConnection = Constants.DEFAULT_MAX_WAIT_FOR_CONNECTION;
 
-    private String serializersName = Constants.DEFAULT_SERIALIZERS.name();
+    private String serializer = Constants.DEFAULT_SERIALIZERS.name();
 }

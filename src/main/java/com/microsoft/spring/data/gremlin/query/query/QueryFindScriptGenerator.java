@@ -7,35 +7,32 @@ package com.microsoft.spring.data.gremlin.query.query;
 
 
 import com.microsoft.spring.data.gremlin.common.GremlinUtils;
+import com.microsoft.spring.data.gremlin.conversion.source.GremlinSource;
+import com.microsoft.spring.data.gremlin.conversion.source.GremlinSourceEdge;
+import com.microsoft.spring.data.gremlin.conversion.source.GremlinSourceVertex;
 import com.microsoft.spring.data.gremlin.query.criteria.Criteria;
 import com.microsoft.spring.data.gremlin.query.criteria.CriteriaType;
-import com.microsoft.spring.data.gremlin.repository.support.GremlinEntityInformation;
 import org.springframework.lang.NonNull;
 import org.springframework.util.Assert;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-
 import static com.microsoft.spring.data.gremlin.common.Constants.*;
 import static com.microsoft.spring.data.gremlin.conversion.script.AbstractGremlinScriptLiteral.*;
 
-@AllArgsConstructor
-@NoArgsConstructor
 public class QueryFindScriptGenerator implements QueryScriptGenerator {
 
-    @Getter
-    @Setter
-    private GremlinEntityInformation information;
+    private final GremlinSource source;
+
+    public QueryFindScriptGenerator(@NonNull GremlinSource source) {
+        this.source = source;
+    }
 
     public String getCriteriaSubject(@NonNull Criteria criteria) {
         String subject = criteria.getSubject();
 
-        if (subject.equals(this.information.getIdField().getName())) {
+        if (subject.equals(this.source.getIdField().getName())) {
             subject = PROPERTY_ID; // If subject is @Id/id field, use id property in database.
         }
 
@@ -46,90 +43,10 @@ public class QueryFindScriptGenerator implements QueryScriptGenerator {
         final String subject = getCriteriaSubject(criteria);
 
         if (subject.equals(PROPERTY_ID)) {
-            return String.format(GREMLIN_PRIMITIVE_WHERE, generateHasId(criteria.getSubValues()));
+            return String.format(GREMLIN_PRIMITIVE_WHERE, generateHasId(criteria.getSubValues().get(0)));
         } else {
-            return String.format(GREMLIN_PRIMITIVE_WHERE, generateHas(subject, criteria.getSubValues()));
+            return String.format(GREMLIN_PRIMITIVE_WHERE, generateHas(subject, criteria.getSubValues().get(0)));
         }
-    }
-
-
-    /**
-     * Generates a where(not(%s))
-     * @param criteria
-     * @return
-     */
-    public String generateNot(@NonNull Criteria criteria) {
-        return String.format(GREMLIN_PRIMITIVE_NOT,
-                this.generateScriptTraversal(criteria.getSubCriteria().get(0)));
-    }
-
-    /**
-     * Generates a where(or(has(subject, value1),...,has(subject, valueN))) based on the subject and values of the
-     * @param criteria
-     * @return
-     */
-    public String generateOr(@NonNull Criteria criteria) {
-        //where(or(has(id, '1458678'), has(id, '1723881'), has(id, '8595585')))
-        Assert.notEmpty(criteria.getSubValues(),
-            "OR criteria sub values can't be empty");
-
-        final String subject = this.getCriteriaSubject(criteria);
-        final List<String> hasList = new ArrayList<>();
-
-        if (subject.equals(PROPERTY_ID)) {
-            criteria.getSubValues().forEach(
-                value -> hasList.add(generateHasId(value.toString())));
-        } else {
-            criteria.getSubValues().forEach(
-                value -> hasList.add(generateHas(subject, value)));
-        }
-
-        return String.format("where(or(%s))",
-            String.join(",", hasList));
-    }
-
-    /**
-     * Generates a where(and(where(has(subject, value1)),...,where(has(subject, valueN))))
-     * based on the subject and values of the input criteria.
-     * @param criteria The input {@link Criteria}
-     * @return The generated script.
-     */
-    public String generateAnd(@NonNull Criteria criteria) {
-        //where(or(has(id, '1458678'), has(id, '1723881'), has(id, '8595585')))
-        Assert.notEmpty(criteria.getSubCriteria(),
-            "AND sub criteria values can't be empty");
-
-        final List<String> subCriteriaTraversal = new ArrayList<>();
-
-        criteria.getSubCriteria().forEach(
-            subCriteria -> {
-                subCriteriaTraversal.add(
-                    this.generateScriptTraversal(subCriteria));
-            });
-
-        return String.format("where(and(%s))",
-            String.join(",", subCriteriaTraversal));
-    }
-
-    public String generateInVScript(@NonNull Criteria criteria) {
-        final String left =
-            this.generateScriptTraversal(criteria.getSubCriteria().get(0));
-        final String right =
-            this.generateScriptTraversal(criteria.getSubCriteria().get(1));
-
-        return this.generateCombinedScript(left, right, criteria.getType());
-    }
-
-    public String generateOutVScript(@NonNull Criteria criteria) {
-        return GREMLIN_PRIMITIVE_OUTV;
-    }
-
-    public String generateOutEdgeScript(@NonNull Criteria criteria) {
-        return String.format(criteria.getSubject(), criteria.getSubValues().get(0));
-    }
-
-    public String generateInEdgeScript(@NonNull Criteria criteria) {
-        return String.format(criteria.getSubject(), criteria.getSubValues().get(0));
     }
 
     /**
@@ -249,21 +166,21 @@ public class QueryFindScriptGenerator implements QueryScriptGenerator {
     }
 
     public List<String> generateScript(@NonNull GremlinQuery query) {
+        final Criteria criteria = query.getCriteria();
         final List<String> scriptList = new ArrayList<>();
 
         scriptList.add(GREMLIN_PRIMITIVE_GRAPH);
 
-        if (this.information.isEntityVertex()) {
+        if (this.source instanceof GremlinSourceVertex) {
             scriptList.add(GREMLIN_PRIMITIVE_VERTEX_ALL);
-        } else if (this.information.isEntityEdge()) {
+        } else if (this.source instanceof GremlinSourceEdge) {
             scriptList.add(GREMLIN_PRIMITIVE_EDGE_ALL);
         } else {
             throw new UnsupportedOperationException("Cannot generate script from graph entity");
         }
 
-        scriptList.add(generateHasLabel(information.getEntityLabel()));
+        scriptList.add(generateHasLabel(this.source.getLabel()));
 
-        final Criteria criteria = query.getCriteria();
 
         if (criteria != null)
         {
@@ -275,13 +192,89 @@ public class QueryFindScriptGenerator implements QueryScriptGenerator {
 
     @Override
     @SuppressWarnings("unchecked")
-    public <T> List<String> generate(@NonNull GremlinQuery query, @NonNull Class<T> domainClass) {
-
-        this.setInformation(GremlinEntityInformation.get(domainClass));
-
+    public List<String> generate(@NonNull GremlinQuery query) {
         final List<String> scriptList = new ArrayList<>(this.generateScript(query));
 
         return Collections.singletonList(String.join(GREMLIN_PRIMITIVE_INVOKE, scriptList));
+    }
+
+    /**
+     * Generates a where(not(%s))
+     * @param criteria
+     * @return
+     */
+    public String generateNot(@NonNull Criteria criteria) {
+        return String.format(GREMLIN_PRIMITIVE_NOT,
+            this.generateScriptTraversal(criteria.getSubCriteria().get(0)));
+    }
+
+    /**
+     * Generates a where(or(has(subject, value1),...,has(subject, valueN))) based on the subject and values of the
+     * @param criteria
+     * @return
+     */
+    public String generateOr(@NonNull Criteria criteria) {
+        //where(or(has(id, '1458678'), has(id, '1723881'), has(id, '8595585')))
+        Assert.notEmpty(criteria.getSubValues(),
+            "OR criteria sub values can't be empty");
+
+        final String subject = this.getCriteriaSubject(criteria);
+        final List<String> hasList = new ArrayList<>();
+
+        if (subject.equals(PROPERTY_ID)) {
+            criteria.getSubValues().forEach(
+                value -> hasList.add(generateHasId(value.toString())));
+        } else {
+            criteria.getSubValues().forEach(
+                value -> hasList.add(generateHas(subject, value)));
+        }
+
+        return String.format("where(or(%s))",
+            String.join(",", hasList));
+    }
+
+    /**
+     * Generates a where(and(where(has(subject, value1)),...,where(has(subject, valueN))))
+     * based on the subject and values of the input criteria.
+     * @param criteria The input {@link Criteria}
+     * @return The generated script.
+     */
+    public String generateAnd(@NonNull Criteria criteria) {
+        //where(or(has(id, '1458678'), has(id, '1723881'), has(id, '8595585')))
+        Assert.notEmpty(criteria.getSubCriteria(),
+            "AND sub criteria values can't be empty");
+
+        final List<String> subCriteriaTraversal = new ArrayList<>();
+
+        criteria.getSubCriteria().forEach(
+            subCriteria -> {
+                subCriteriaTraversal.add(
+                    this.generateScriptTraversal(subCriteria));
+            });
+
+        return String.format("where(and(%s))",
+            String.join(",", subCriteriaTraversal));
+    }
+
+    public String generateInVScript(@NonNull Criteria criteria) {
+        final String left =
+            this.generateScriptTraversal(criteria.getSubCriteria().get(0));
+        final String right =
+            this.generateScriptTraversal(criteria.getSubCriteria().get(1));
+
+        return this.generateCombinedScript(left, right, criteria.getType());
+    }
+
+    public String generateOutVScript(@NonNull Criteria criteria) {
+        return GREMLIN_PRIMITIVE_OUTV;
+    }
+
+    public String generateOutEdgeScript(@NonNull Criteria criteria) {
+        return String.format(criteria.getSubject(), criteria.getSubValues().get(0));
+    }
+
+    public String generateInEdgeScript(@NonNull Criteria criteria) {
+        return String.format(criteria.getSubject(), criteria.getSubValues().get(0));
     }
 }
 

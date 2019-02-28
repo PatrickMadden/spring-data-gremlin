@@ -5,17 +5,18 @@
  */
 package com.microsoft.spring.data.gremlin.config;
 
+
 import com.microsoft.spring.data.gremlin.common.domain.*;
-import lombok.NoArgsConstructor;
-import lombok.SneakyThrows;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
+
+import lombok.NoArgsConstructor;
+import lombok.SneakyThrows;
 
 public class GremlinConfigurationSupportUnitTest {
 
@@ -55,7 +56,7 @@ public class GremlinConfigurationSupportUnitTest {
                 Dependency.class, Library.class, Network.class, Person.class, Project.class,
                 Relationship.class, Roadmap.class, Service.class, SimpleDependency.class, InvalidDependency.class,
                 UserDomain.class, AdvancedUser.class, Student.class, Book.class, BookReference.class,
-                Neighbor.class)
+                Neighbor.class, Master.class, Group.class, GroupOwner.class, Orange.class)
         );
 
         Assert.assertNotNull(entities);

@@ -5,21 +5,26 @@
  */
 package com.microsoft.spring.data.gremlin.common;
 
+
+import com.microsoft.spring.data.gremlin.annotation.GeneratedValue;
+import com.microsoft.spring.data.gremlin.conversion.source.GremlinSource;
+import com.microsoft.spring.data.gremlin.exception.GremlinIllegalConfigurationException;
 import com.microsoft.spring.data.gremlin.exception.GremlinInvalidEntityIdFieldException;
-import lombok.AccessLevel;
-import lombok.NoArgsConstructor;
+import com.microsoft.spring.data.gremlin.exception.GremlinUnexpectedSourceTypeException;
+import com.microsoft.spring.data.gremlin.repository.support.GremlinEntityInformation;
 import org.apache.commons.lang3.reflect.FieldUtils;
 import org.apache.tinkerpop.shaded.jackson.annotation.JsonAutoDetect;
-import org.apache.tinkerpop.shaded.jackson.databind.MapperFeature;
 import org.apache.tinkerpop.shaded.jackson.databind.ObjectMapper;
 import org.springframework.data.annotation.Id;
 import org.springframework.lang.NonNull;
 import org.springframework.util.ReflectionUtils;
-
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 
 import static com.microsoft.spring.data.gremlin.common.Constants.GREMLIN_QUERY_BARRIER;
 
@@ -29,7 +34,7 @@ public class GremlinUtils {
     private static final ObjectMapper mapper = new ObjectMapper();
 
     static {
-//        mapper.enable(MapperFeature.AUTO_DETECT_FIELDS);
+//        mapper.enable(MapperFeature.AUTO_DETECT_FIELDS, false);
 
         mapper.setVisibility(
             mapper.getSerializationConfig().
@@ -59,12 +64,19 @@ public class GremlinUtils {
 
     public static <T> Field getIdField(@NonNull Class<T> domainClass) {
         final Field idField;
-        final List<Field> fields = FieldUtils.getFieldsListWithAnnotation(domainClass, Id.class);
+        final List<Field> idFields = FieldUtils.getFieldsListWithAnnotation(domainClass, Id.class);
+        final List<Field> generatedValueFields =
+                FieldUtils.getFieldsListWithAnnotation(domainClass, GeneratedValue.class);
 
-        if (fields.isEmpty()) {
+        if (generatedValueFields.size() > 1) {
+            throw new GremlinIllegalConfigurationException("Only one field, the id field, can have the optional "
+                    + "@GeneratedValue annotation!");
+        }
+
+        if (idFields.isEmpty()) {
             idField = ReflectionUtils.findField(domainClass, Constants.PROPERTY_ID);
-        } else if (fields.size() == 1) {
-            idField = fields.get(0);
+        } else if (idFields.size() == 1) {
+            idField = idFields.get(0);
         } else {
             throw new GremlinInvalidEntityIdFieldException("only one @Id field is allowed");
         }
@@ -74,6 +86,11 @@ public class GremlinUtils {
         } else if (idField.getType() != String.class
                 && idField.getType() != Long.class && idField.getType() != Integer.class) {
             throw new GremlinInvalidEntityIdFieldException("the type of @Id/id field should be String/Integer/Long");
+        }
+
+        if (generatedValueFields.size() == 1 && !generatedValueFields.get(0).equals(idField)) {
+            throw new GremlinIllegalConfigurationException("Only the id field can have the optional "
+                    + "@GeneratedValue annotation!");
         }
 
         return idField;
@@ -99,6 +116,10 @@ public class GremlinUtils {
         }
     }
 
+    public static <T> GremlinSource<T> toGremlinSource(@NonNull Class<T> domainClass) {
+        return GremlinEntityInformation.get(domainClass).getGremlinSource();
+    }
+
     public static List<List<String>> toParallelQueryList(@NonNull List<String> queries) {
         final List<List<String>> parallelQueries = new ArrayList<>();
         List<String> parallelQuery = new ArrayList<>();
@@ -115,5 +136,13 @@ public class GremlinUtils {
         parallelQueries.add(parallelQuery);
 
         return parallelQueries;
+    }
+
+    public static Class<?> toEntityClass(@NonNull String className) {
+        try {
+            return Class.forName(className);
+        } catch (ClassNotFoundException e) {
+            throw new GremlinUnexpectedSourceTypeException("failed to retrieve class: " + className, e);
+        }
     }
 }

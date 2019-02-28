@@ -5,8 +5,8 @@
  */
 package com.microsoft.spring.data.gremlin.conversion.script;
 
-import com.microsoft.spring.data.gremlin.conversion.source.GremlinSource;
 
+import com.microsoft.spring.data.gremlin.conversion.source.GremlinSource;
 import java.util.List;
 
 /**
@@ -22,7 +22,7 @@ public interface GremlinScriptLiteral {
     /**
      * Generate the deleteAll query from source (Vertex, Edge or Graph).
      */
-    List<String> generateDeleteAllScript(GremlinSource source);
+    List<String> generateDeleteAllScript();
 
     /**
      * Generate the deleteAll By Domain Class query from source (Vertex, Edge or Graph).
@@ -52,5 +52,5 @@ public interface GremlinScriptLiteral {
     /**
      * Generate the Count query from Source (Vertex, Edge)
      */
-    String generateCountScript(GremlinSource source);
+    List<String>  generateCountScript(GremlinSource source);
 }

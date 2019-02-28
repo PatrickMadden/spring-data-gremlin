@@ -5,32 +5,27 @@
  */
 package com.microsoft.spring.data.gremlin.conversion.source;
 
-import com.microsoft.spring.data.gremlin.conversion.MappingGremlinConverter;
-import com.microsoft.spring.data.gremlin.conversion.result.GremlinResultReader;
-import com.microsoft.spring.data.gremlin.conversion.script.GremlinScriptLiteral;
-import lombok.NonNull;
-import org.apache.tinkerpop.gremlin.driver.Result;
 
+import com.microsoft.spring.data.gremlin.conversion.MappingGremlinConverter;
+import com.microsoft.spring.data.gremlin.conversion.result.GremlinResultsReader;
+import com.microsoft.spring.data.gremlin.conversion.script.GremlinScriptLiteral;
+import org.apache.tinkerpop.gremlin.driver.Result;
 import java.lang.reflect.Field;
+import java.util.List;
 import java.util.Map;
+import java.util.Optional;
+
+import lombok.NonNull;
 
 /**
  * Provider interface to obtain and store information from domain class.
  * For Vertex and Edge, they consist of id (String, Reserved), label (String, Reserved) and
  * a set of properties.
  * The property key should be String, and value can be one of String, number and boolean.
+ *
+ * @param <T> The type of domain.
  */
-public interface GremlinSource {
-
-    /**
-     * Set the id of domain
-     */
-    void setId(Object id);
-
-    /**
-     * Set the label of domain
-     */
-    void setLabel(String label);
+public interface GremlinSource<T> {
 
     /**
      * Set the property map of domain
@@ -40,10 +35,14 @@ public interface GremlinSource {
     /**
      * Get the id of domain
      *
-     * @return will never be null
+     * @return the Optional of id
      */
-    @NonNull
-    Object getId();
+    Optional<Object> getId();
+
+    /**
+     * Set the id of domain
+     */
+    void setId(Object id);
 
     /**
      * Get the id Field of domain
@@ -53,12 +52,30 @@ public interface GremlinSource {
     Field getIdField();
 
     /**
+     * Set the id of domain
+     */
+    void setIdField(Field id);
+
+    /**
      * Get the label of domain
      *
      * @return will never be null
      */
     @NonNull
     String getLabel();
+
+    /**
+     * Set the label of domain
+     */
+    void setLabel(String label);
+
+    /**
+     * Get the Class type of domain
+     *
+     * @return will never be null
+     */
+    @NonNull
+    Class<T> getDomainClass();
 
     /**
      * Get the properties of domain
@@ -75,12 +92,12 @@ public interface GremlinSource {
     /**
      * do the real reading from Result to GremlinSource
      */
-    void doGremlinResultRead(Result result);
+    void doGremlinResultRead(List<Result> results);
 
     /**
      * do the real reading from GremlinSource to domain
      */
-    <T extends Object> T doGremlinSourceRead(Class<T> type, MappingGremlinConverter converter);
+    T doGremlinSourceRead(Class<T> domainClass, MappingGremlinConverter converter);
 
     /**
      * return the GremlinScriptLiteral
@@ -100,7 +117,7 @@ public interface GremlinSource {
     /**
      * Set the ResultReader for reading data from Gremlin Result to GremlinSource
      */
-    void setGremlinResultReader(GremlinResultReader reader);
+    void setGremlinResultReader(GremlinResultsReader reader);
 
     /**
      * Set the SourceReader for reading data from GremlinSource to domain

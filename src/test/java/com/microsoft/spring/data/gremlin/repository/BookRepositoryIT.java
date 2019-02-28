@@ -5,12 +5,12 @@
  */
 package com.microsoft.spring.data.gremlin.repository;
 
+
 import com.google.common.collect.Lists;
 import com.microsoft.spring.data.gremlin.common.GremlinEntityType;
 import com.microsoft.spring.data.gremlin.common.TestRepositoryConfiguration;
 import com.microsoft.spring.data.gremlin.common.domain.Book;
 import com.microsoft.spring.data.gremlin.common.repository.BookRepository;
-import lombok.NonNull;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -18,8 +18,9 @@ import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-
 import java.util.*;
+
+import lombok.NonNull;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(classes = TestRepositoryConfiguration.class)
@@ -195,5 +196,28 @@ public class BookRepositoryIT {
         found = repository.findByNameOrPrice(NO_EXIST_NAME, NO_EXIST_PRICE);
 
         Assert.assertTrue(found.isEmpty());
+    }
+
+    @Test
+    public void testFindAllIncomplete() {
+        final Book book = new Book(ID_0, null, 2.34);
+        final Book bookNullName = new Book(ID_1, "null", 243.34);
+
+        repository.save(book);
+        repository.save(bookNullName);
+
+        final Optional<Book> optional = repository.findById(book.getSerialNumber());
+
+        Assert.assertTrue(optional.isPresent());
+        Assert.assertEquals(optional.get(), book);
+
+        final Optional<Book> optionalNullName = repository.findById(bookNullName.getSerialNumber());
+
+        Assert.assertTrue(optionalNullName.isPresent());
+        Assert.assertEquals(optionalNullName.get(), bookNullName);
+
+        final List<Book> books = Lists.newArrayList(repository.findAll());
+
+        assertDomainListEquals(books, Arrays.asList(book, bookNullName));
     }
 }

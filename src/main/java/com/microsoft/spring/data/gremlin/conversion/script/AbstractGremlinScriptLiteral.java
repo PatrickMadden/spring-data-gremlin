@@ -6,12 +6,14 @@
 package com.microsoft.spring.data.gremlin.conversion.script;
 
 
+import com.microsoft.spring.data.gremlin.annotation.GeneratedValue;
 import com.microsoft.spring.data.gremlin.common.GremlinEntityType;
 import com.microsoft.spring.data.gremlin.common.GremlinUtils;
 import com.microsoft.spring.data.gremlin.exception.GremlinInvalidEntityIdFieldException;
 import com.microsoft.spring.data.gremlin.exception.GremlinUnexpectedEntityTypeException;
 import org.apache.tinkerpop.shaded.jackson.core.JsonProcessingException;
 import org.springframework.util.Assert;
+import java.lang.reflect.Field;
 import java.util.*;
 
 import lombok.NonNull;
@@ -68,16 +70,30 @@ public abstract class AbstractGremlinScriptLiteral {
         return String.format("has(label, '%s')", label);
     }
 
-    public static String generateHasId(@NonNull String id) {
-        return String.format("has(id, '%s')", id);
+    public static String generateHasId(@NonNull Object id) {
+        if (id instanceof String) {
+            return String.format("hasId('%s')", id);
+        } else if (id instanceof Integer) {
+            return String.format("hasId(%d)", (Integer) id);
+        } else if (id instanceof Long) {
+            return String.format("hasId(%d)", (Long) id);
+        } else {
+            throw new GremlinInvalidEntityIdFieldException("the type of @Id/id field should be String/Integer/Long");
+        }
     }
 
-    public static String generateHasId(@NonNull List<Object> ids) {
-        final List<String> hasIds = new ArrayList<>(ids.size());
-
-        ids.forEach(id -> hasIds.add(generateHasId(id.toString())));
-
-        return generateHasShared(hasIds);
+    public static String generateHasId(@NonNull Object id, @NonNull Field idFiled) {
+        if (!idFiled.isAnnotationPresent(GeneratedValue.class)) {
+            return generateHasId(id);
+        } else if (id instanceof String) {
+            return String.format("hasId('%s')", id);
+        } else if (id instanceof Integer) {
+            return String.format("hasId(%dL)", (Integer) id);
+        } else if (id instanceof Long) {
+            return String.format("hasId(%dL)", (Long) id);
+        } else {
+            throw new GremlinInvalidEntityIdFieldException("the type of @Id/id field should be String/Integer/Long");
+        }
     }
 
 
@@ -194,7 +210,8 @@ public abstract class AbstractGremlinScriptLiteral {
     public List<String> generateProperties(@NonNull final Map<String, Object> properties) {
         final List<String> scripts = new ArrayList<>();
 
-        properties.forEach((name, value) -> scripts.add(generateProperty(name, value)));
+        properties.entrySet().stream().filter(e -> e.getValue() != null)
+                .forEach(e -> scripts.add(generateProperty(e.getKey(), e.getValue())));
 
         return scripts;
     }

@@ -5,6 +5,8 @@
  */
 package com.microsoft.spring.data.gremlin.conversion.script;
 
+
+import com.microsoft.spring.data.gremlin.common.domain.Person;
 import com.microsoft.spring.data.gremlin.conversion.result.GremlinResultEdgeReader;
 import com.microsoft.spring.data.gremlin.conversion.result.GremlinResultVertexReader;
 import com.microsoft.spring.data.gremlin.conversion.source.GremlinSource;
@@ -15,20 +17,21 @@ import com.microsoft.spring.data.gremlin.exception.GremlinUnexpectedSourceTypeEx
 import org.apache.tinkerpop.gremlin.driver.Result;
 import org.junit.Assert;
 import org.junit.Test;
-
 import java.util.HashMap;
 import java.util.Map;
+
+import static java.util.Collections.singletonList;
 
 public class GremlinScriptUnitTest {
 
     @Test(expected = GremlinUnexpectedSourceTypeException.class)
     public void testVertexWriteException() {
-        new GremlinResultVertexReader().read(new Result(new Object()), new GremlinSourceEdge());
+        new GremlinResultVertexReader().read(singletonList(new Result(new Object())), new GremlinSourceEdge());
     }
 
     @Test(expected = GremlinUnexpectedSourceTypeException.class)
     public void testEdgeReadException() {
-        new GremlinResultEdgeReader().read(new Result(new Object()), new GremlinSourceVertex());
+        new GremlinResultEdgeReader().read(singletonList(new Result(new Object())), new GremlinSourceVertex());
     }
 
     @Test(expected = GremlinUnexpectedEntityTypeException.class)
@@ -84,14 +87,9 @@ public class GremlinScriptUnitTest {
         new GremlinScriptLiteralVertex().generateCountScript(new GremlinSourceEdge());
     }
 
-    @Test(expected = GremlinUnexpectedSourceTypeException.class)
-    public void testVertexDeleteAllScriptException() {
-        new GremlinScriptLiteralVertex().generateDeleteAllScript(new GremlinSourceEdge());
-    }
-
     @Test
     public void testVertexSourceSetProperty() {
-        final GremlinSource source = new GremlinSourceVertex();
+        final GremlinSource<Person> source = new GremlinSourceVertex<>(Person.class);
         final Map<String, Object> properties = source.getProperties();
         final String fakeName = "fake-name";
 
@@ -101,7 +99,7 @@ public class GremlinScriptUnitTest {
 
         source.setProperty(fakeName, null);
 
-        Assert.assertEquals(source.getProperties().size(), 2);
+        Assert.assertEquals(source.getProperties().size(), 3); // one predefined property _classname
         Assert.assertNull(source.getProperties().get(fakeName));
     }
 }

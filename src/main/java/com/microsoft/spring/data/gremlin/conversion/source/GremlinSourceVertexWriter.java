@@ -6,8 +6,8 @@
 package com.microsoft.spring.data.gremlin.conversion.source;
 
 
-import com.microsoft.spring.data.gremlin.common.Constants;
 import com.microsoft.spring.data.gremlin.conversion.MappingGremlinConverter;
+import com.microsoft.spring.data.gremlin.exception.GremlinEntityInformationException;
 import com.microsoft.spring.data.gremlin.exception.GremlinUnexpectedSourceTypeException;
 import com.microsoft.spring.data.gremlin.mapping.GremlinPersistentEntity;
 import org.springframework.data.annotation.Id;
@@ -17,6 +17,9 @@ import org.springframework.lang.NonNull;
 import java.lang.reflect.Field;
 
 import lombok.NoArgsConstructor;
+
+import static com.microsoft.spring.data.gremlin.common.Constants.GREMLIN_PROPERTY_CLASSNAME;
+import static com.microsoft.spring.data.gremlin.common.Constants.PROPERTY_ID;
 
 @NoArgsConstructor
 public class GremlinSourceVertexWriter implements GremlinSourceWriter {
@@ -40,12 +43,14 @@ public class GremlinSourceVertexWriter implements GremlinSourceWriter {
             if (property != null) {
                 //Assert.notNull(property, field.getName() + " persistence property should not be null");
 
-                if (field.getName().equals(Constants.PROPERTY_ID) ||
+                if (field.getName().equals(PROPERTY_ID) ||
                     field.getAnnotation(Id.class) != null) {
                     continue;
                 }
-
                 source.setProperty(field.getName(), accessor.getProperty(property));
+            } else if (field.getName().equals(GREMLIN_PROPERTY_CLASSNAME)) {
+                throw new GremlinEntityInformationException("Domain Cannot use pre-defined field name: "
+                    + GREMLIN_PROPERTY_CLASSNAME);
             }
         }
     }

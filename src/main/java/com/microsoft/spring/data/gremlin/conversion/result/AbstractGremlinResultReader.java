@@ -5,32 +5,34 @@
  */
 package com.microsoft.spring.data.gremlin.conversion.result;
 
+
 import com.microsoft.spring.data.gremlin.common.Constants;
 import com.microsoft.spring.data.gremlin.conversion.source.GremlinSource;
-import lombok.NoArgsConstructor;
 import org.springframework.lang.NonNull;
 import org.springframework.util.Assert;
-
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
+import lombok.NoArgsConstructor;
+
 @NoArgsConstructor
+// TODO: seems only for Vertex.
 public abstract class AbstractGremlinResultReader {
 
     /**
      * properties's organization is a little complicated.
-     *
-     * properties is HashMap<K, V>
+     * <p>
+     * properties is LinkedHashMap<K, V>
      * K is String
      * V is ArrayList<T>
-     * T is HashMap<String, String>
+     * T is LinkedHashMap<String, String>
      */
     private Object readProperty(@NonNull Object value) {
         Assert.isInstanceOf(ArrayList.class, value, "should be instance of ArrayList");
 
-        @SuppressWarnings("unchecked") final ArrayList<HashMap<String, String>> mapList
-                = (ArrayList<HashMap<String, String>>) value;
+        @SuppressWarnings("unchecked") final ArrayList<LinkedHashMap<String, String>> mapList
+                = (ArrayList<LinkedHashMap<String, String>>) value;
 
         Assert.isTrue(mapList.size() == 1, "should be only 1 element in ArrayList");
 
@@ -38,8 +40,7 @@ public abstract class AbstractGremlinResultReader {
     }
 
     protected void readResultProperties(@NonNull Map<String, Object> properties, @NonNull GremlinSource source) {
-        Assert.isTrue(source.getProperties().isEmpty(), "should be empty GremlinSource");
-
+        source.getProperties().clear();
         properties.forEach((key, value) -> source.setProperty(key, this.readProperty(value)));
     }
 }

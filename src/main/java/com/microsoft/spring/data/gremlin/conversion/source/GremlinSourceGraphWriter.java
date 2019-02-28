@@ -9,10 +9,10 @@ package com.microsoft.spring.data.gremlin.conversion.source;
 import com.microsoft.spring.data.gremlin.annotation.EdgeSet;
 import com.microsoft.spring.data.gremlin.annotation.VertexSet;
 import com.microsoft.spring.data.gremlin.common.Constants;
+import com.microsoft.spring.data.gremlin.common.GremlinUtils;
 import com.microsoft.spring.data.gremlin.conversion.MappingGremlinConverter;
 import com.microsoft.spring.data.gremlin.exception.GremlinUnexpectedSourceTypeException;
 import com.microsoft.spring.data.gremlin.mapping.GremlinPersistentEntity;
-import com.microsoft.spring.data.gremlin.repository.support.GremlinEntityInformation;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mapping.PersistentProperty;
 import org.springframework.data.mapping.model.ConvertingPropertyAccessor;
@@ -31,7 +31,7 @@ public class GremlinSourceGraphWriter implements GremlinSourceWriter {
         Assert.isInstanceOf(GremlinSourceGraph.class, sourceGraph, "should be instance of GremlinSourceGraph ");
 
         for (final Object object : objectList) {
-            final GremlinSource source = GremlinEntityInformation.get(object.getClass()).getGremlinSource();
+            final GremlinSource source = GremlinUtils.toGremlinSource(object.getClass());
 
             source.doGremlinSourceWrite(object, mappingConverter);
             sourceGraph.addGremlinSource(source);
@@ -53,7 +53,6 @@ public class GremlinSourceGraphWriter implements GremlinSourceWriter {
             final PersistentProperty property = persistentEntity.getPersistentProperty(field.getName());
 
             if (property != null) {
-                Assert.notNull(property, "persistence property should not be null");
 
                 if (field.getName().equals(Constants.PROPERTY_ID) ||
                     field.getAnnotation(Id.class) != null) {

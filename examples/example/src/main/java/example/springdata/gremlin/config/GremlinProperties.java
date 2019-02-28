@@ -9,6 +9,8 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+
+import org.apache.tinkerpop.gremlin.driver.ser.Serializers;
 import com.microsoft.spring.data.gremlin.common.Constants;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
@@ -26,11 +28,11 @@ public class GremlinProperties {
 
     private String password;
 
+    private boolean sslEnabled;
+
     private boolean telemetryAllowed = true;
 
-    private boolean sslEnabled = true;
+	private int maxContentLength = Constants.DEFAULT_MAX_CONTENT_LENGTH;
 
-    private int maxContentLength = Constants.DEFAULT_MAX_CONTENT_LENGTH;
-
-    private String serializersName = Constants.DEFAULT_SERIALIZERS.name();
+    private String serializer = Serializers.GRAPHSON.toString();
 }

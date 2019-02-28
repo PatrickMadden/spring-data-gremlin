@@ -5,53 +5,44 @@
  */
 package com.microsoft.spring.data.gremlin.conversion.script;
 
+
 import com.microsoft.spring.data.gremlin.conversion.source.GremlinSource;
 import com.microsoft.spring.data.gremlin.conversion.source.GremlinSourceGraph;
 import com.microsoft.spring.data.gremlin.exception.GremlinUnexpectedSourceTypeException;
-import lombok.NoArgsConstructor;
 import org.springframework.lang.NonNull;
 import org.springframework.lang.Nullable;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.function.Function;
+
+import lombok.NoArgsConstructor;
 
 import static com.microsoft.spring.data.gremlin.common.Constants.*;
 
 @NoArgsConstructor
 public class GremlinScriptLiteralGraph implements GremlinScriptLiteral {
 
+    private final GremlinScriptLiteralVertex scriptVertex = new GremlinScriptLiteralVertex();
+
+    private final GremlinScriptLiteralEdge scriptEdge = new GremlinScriptLiteralEdge();
+
     @Override
     public List<String> generateInsertScript(@NonNull GremlinSource source) {
-        if (!(source instanceof GremlinSourceGraph)) {
-            throw new GremlinUnexpectedSourceTypeException("should be the instance of GremlinSourceGraph");
-        }
-
-        final List<String> scriptList = new ArrayList<>();
-        final GremlinSourceGraph sourceGraph = (GremlinSourceGraph) source;
-        final GremlinScriptLiteralVertex scriptVertex = new GremlinScriptLiteralVertex();
-        final GremlinScriptLiteralEdge scriptEdge = new GremlinScriptLiteralEdge();
-
-        sourceGraph.getVertexSet().forEach(vertex -> scriptList.addAll(scriptVertex.generateInsertScript(vertex)));
-        scriptList.add(GREMLIN_QUERY_BARRIER);
-        sourceGraph.getEdgeSet().forEach(edge -> scriptList.addAll(scriptEdge.generateInsertScript(edge)));
-
-        return scriptList;
+        return generateInsertUpdateScript(source,
+                scriptVertex::generateInsertScript,
+                scriptEdge::generateInsertScript);
     }
 
     @Override
-    public List<String> generateDeleteAllScript(@Nullable GremlinSource source) {
-        if (!(source instanceof GremlinSourceGraph)) {
-            throw new GremlinUnexpectedSourceTypeException("should be the instance of GremlinSourceGraph");
-        }
-
+    public List<String> generateDeleteAllScript() {
         return Arrays.asList(GREMLIN_SCRIPT_EDGE_DROP_ALL, GREMLIN_QUERY_BARRIER, GREMLIN_SCRIPT_VERTEX_DROP_ALL);
     }
 
     @Override
     public List<String> generateDeleteAllByClassScript(@NonNull GremlinSource source) {
-        return generateDeleteAllScript(source);
+        return generateDeleteAllScript();
     }
 
     @Override
@@ -61,18 +52,27 @@ public class GremlinScriptLiteralGraph implements GremlinScriptLiteral {
 
     @Override
     public List<String> generateUpdateScript(@NonNull GremlinSource source) {
+        return generateInsertUpdateScript(source,
+                scriptVertex::generateUpdateScript,
+                scriptEdge::generateUpdateScript);
+    }
+
+    @SuppressWarnings("unchecked")
+    private List<String> generateInsertUpdateScript(@NonNull GremlinSource source,
+                                                    @NonNull Function<GremlinSource, List<String>> vertexHandler,
+                                                    @NonNull Function<GremlinSource, List<String>> edgeHandler) {
         if (!(source instanceof GremlinSourceGraph)) {
             throw new GremlinUnexpectedSourceTypeException("should be the instance of GremlinSourceGraph");
         }
 
         final List<String> scriptList = new ArrayList<>();
         final GremlinSourceGraph sourceGraph = (GremlinSourceGraph) source;
-        final GremlinScriptLiteralVertex scriptVertex = new GremlinScriptLiteralVertex();
-        final GremlinScriptLiteralEdge scriptEdge = new GremlinScriptLiteralEdge();
+        final List<GremlinSource> vertexes = (List<GremlinSource>) sourceGraph.getVertexSet();
+        final List<GremlinSource> edges = (List<GremlinSource>) sourceGraph.getEdgeSet();
 
-        sourceGraph.getVertexSet().forEach(vertex -> scriptList.addAll(scriptVertex.generateUpdateScript(vertex)));
+        vertexes.forEach(vertex -> scriptList.addAll(vertexHandler.apply(vertex)));
         scriptList.add(GREMLIN_QUERY_BARRIER);
-        sourceGraph.getEdgeSet().forEach(edge -> scriptList.addAll(scriptEdge.generateUpdateScript(edge)));
+        edges.forEach(edge -> scriptList.addAll(edgeHandler.apply(edge)));
 
         return scriptList;
     }
@@ -83,7 +83,7 @@ public class GremlinScriptLiteralGraph implements GremlinScriptLiteral {
             throw new GremlinUnexpectedSourceTypeException("should be the instance of GremlinSourceGraph");
         }
 
-        return this.generateDeleteAllScript(source);
+        return this.generateDeleteAllScript();
     }
 
     @Override
@@ -99,7 +99,7 @@ public class GremlinScriptLiteralGraph implements GremlinScriptLiteral {
     }
 
     @Override
-    public String generateCountScript(@NonNull GremlinSource source) {
+    public List<String> generateCountScript(@NonNull GremlinSource source) {
         throw new UnsupportedOperationException("Gremlin graph counting is not available.");
     }
 }

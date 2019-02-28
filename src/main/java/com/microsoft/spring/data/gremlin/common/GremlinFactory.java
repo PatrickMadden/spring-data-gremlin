@@ -13,7 +13,6 @@ import org.apache.tinkerpop.gremlin.driver.ser.Serializers;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.lang.NonNull;
 
-
 public class GremlinFactory {
 
     private Cluster gremlinCluster;
@@ -40,7 +39,7 @@ public class GremlinFactory {
         final Cluster cluster;
 
         try {
-            final String serializersName = this.gremlinConfig.getSerializersName();
+            final String serializersName = this.gremlinConfig.getSerializer();
 
             Serializers serializers;
 
