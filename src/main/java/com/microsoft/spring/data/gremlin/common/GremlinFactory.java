@@ -56,6 +56,15 @@ public class GremlinFactory {
                     .port(this.gremlinConfig.getPort())
                     .maxContentLength(this.gremlinConfig.getMaxContentLength())
                     .maxWaitForConnection(this.gremlinConfig.getMaxWaitForConnection())
+                    .minConnectionPoolSize(this.gremlinConfig.getMinConnectionPoolSize())
+                    .maxConnectionPoolSize(this.gremlinConfig.getMaxConnectionPoolSize())
+                    .maxWaitForSessionClose(this.gremlinConfig.getMaxWaitForSessionClose())
+                    .minSimultaneousUsagePerConnection(this.gremlinConfig.getMinSimultaneousUsagePerConnection())
+                    .maxSimultaneousUsagePerConnection(this.gremlinConfig.getMaxSimultaneousUsagePerConnection())
+                    .minInProcessPerConnection(this.gremlinConfig.getMinInProcessPerConnection())
+                    .maxInProcessPerConnection(this.gremlinConfig.getMaxInProcessPerConnection())
+                    .keepAliveInterval(this.gremlinConfig.getKeepAliveInterval())
+                    .workerPoolSize(this.gremlinConfig.getWorkerPoolSize())
                     .create();
         } catch (IllegalArgumentException e) {
             throw new GremlinIllegalConfigurationException("Invalid configuration of Gremlin", e);

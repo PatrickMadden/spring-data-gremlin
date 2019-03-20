@@ -76,10 +76,10 @@ public class GremlinTemplateIT {
             GremlinEntityInformation.get(Relationship.class);
     private final GremlinEntityInformation<Network, String> networkInfo = GremlinEntityInformation.get(Network.class);
 
-    private final GremlinSource<Person> personSource = personInfo.getGremlinSource();
-    private final GremlinSource<Project> projectSource = projectInfo.getGremlinSource();
-    private final GremlinSource<Relationship> relationshipSource = relationshipInfo.getGremlinSource();
-    private final GremlinSource<Network> networkSource = networkInfo.getGremlinSource();
+    private final GremlinSource<Person> personSource = personInfo.createGremlinSource();
+    private final GremlinSource<Project> projectSource = projectInfo.createGremlinSource();
+    private final GremlinSource<Relationship> relationshipSource = relationshipInfo.createGremlinSource();
+    private final GremlinSource<Network> networkSource = networkInfo.createGremlinSource();
 
     @Autowired
     private ApplicationContext context;
@@ -327,7 +327,7 @@ public class GremlinTemplateIT {
         project.setUri(updatedUri);
         relationship.setLocation(updatedLocation);
 
-        this.template.update(network, this.networkInfo.getGremlinSource());
+        this.template.update(network, this.networkInfo.createGremlinSource());
 
         final Person foundPerson = this.template.findById(person.getId(), this.personSource);
         final Project foundProject = this.template.findById(project.getId(), this.projectSource);
@@ -423,7 +423,7 @@ public class GremlinTemplateIT {
         final String updatedName = "updated-name";
         this.relationship.setName(updatedName);
 
-        this.template.save(network, this.networkInfo.getGremlinSource());
+        this.template.save(network, this.networkInfo.createGremlinSource());
 
         relationshipFound = this.template.findById(this.relationship.getId(), this.relationshipSource);
 

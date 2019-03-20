@@ -38,7 +38,7 @@ public class SimpleGremlinRepository<T, ID extends Serializable> implements Grem
     @Override
     @SuppressWarnings("unchecked")
     public <S extends T> S save(@NonNull S domain) {
-        final GremlinSource<T> source = this.information.getGremlinSource();
+        final GremlinSource<T> source = this.information.createGremlinSource();
 
         source.setId(this.information.getId(domain));
 
@@ -52,7 +52,7 @@ public class SimpleGremlinRepository<T, ID extends Serializable> implements Grem
 
     @Override
     public Iterable<T> findAll() {
-        final GremlinSource<T> source = this.information.getGremlinSource();
+        final GremlinSource<T> source = this.information.createGremlinSource();
 
         if (source instanceof GremlinSourceGraph) {
             throw new UnsupportedOperationException("findAll of Graph is not supported");
@@ -69,7 +69,7 @@ public class SimpleGremlinRepository<T, ID extends Serializable> implements Grem
 
     @Override
     public Optional<T> findById(@NonNull ID id) {
-        final T domain = this.operations.findById(id, this.information.getGremlinSource());
+        final T domain = this.operations.findById(id, this.information.createGremlinSource());
 
         return domain == null ? Optional.empty() : Optional.of(domain);
     }
@@ -113,12 +113,12 @@ public class SimpleGremlinRepository<T, ID extends Serializable> implements Grem
 
     @Override
     public void delete(@NonNull T domain) {
-        this.operations.deleteById(this.information.getId(domain), this.information.getGremlinSource());
+        this.operations.deleteById(this.information.getId(domain), this.information.createGremlinSource());
     }
 
     @Override
     public void deleteById(@NonNull ID id) {
-        this.operations.deleteById(id, this.information.getGremlinSource());
+        this.operations.deleteById(id, this.information.createGremlinSource());
     }
 
     @Override
@@ -138,12 +138,12 @@ public class SimpleGremlinRepository<T, ID extends Serializable> implements Grem
 
     @Override
     public void deleteAll(@NonNull Class<T> domainClass) {
-        this.operations.deleteAll(this.information.getGremlinSource());
+        this.operations.deleteAll(this.information.createGremlinSource());
     }
 
     @Override
     public boolean existsById(@NonNull ID id) {
-        return this.operations.existsById(id, this.information.getGremlinSource());
+        return this.operations.existsById(id, this.information.createGremlinSource());
     }
 }
 

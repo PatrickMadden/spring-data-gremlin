@@ -71,7 +71,11 @@ public class GremlinScriptLiteralGraph implements GremlinScriptLiteral {
         final List<GremlinSource> edges = (List<GremlinSource>) sourceGraph.getEdgeSet();
 
         vertexes.forEach(vertex -> scriptList.addAll(vertexHandler.apply(vertex)));
-        scriptList.add(GREMLIN_QUERY_BARRIER);
+
+        if (!vertexes.isEmpty() && !edges.isEmpty()) {
+            scriptList.add(GREMLIN_QUERY_BARRIER);
+        }
+
         edges.forEach(edge -> scriptList.addAll(edgeHandler.apply(edge)));
 
         return scriptList;

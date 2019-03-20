@@ -39,8 +39,9 @@ public class GremlinEntityInformation<T, ID> extends AbstractEntityInformation<T
     @Getter
     private GremlinEntityType entityType;
 
-    @Getter
-    private GremlinSource<T> gremlinSource;
+    public GremlinSource<T> createGremlinSource() {
+        return this.createGremlinSource(this.getJavaType(), this.idField);
+    }
 
     private static Map<Class, GremlinEntityInformation> entityInformationMap =
         new ConcurrentHashMap<>();
@@ -65,7 +66,6 @@ public class GremlinEntityInformation<T, ID> extends AbstractEntityInformation<T
         ReflectionUtils.makeAccessible(this.idField);
 
         this.entityType = this.getGremlinEntityType(domainClass); // The other fields getter may depend on type
-        this.gremlinSource = this.createGremlinSource(domainClass, this.idField);
     }
 
     public boolean isEntityEdge() {

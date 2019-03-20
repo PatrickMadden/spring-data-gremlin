@@ -49,7 +49,7 @@ public class GremlinScriptLiteralEdgeUnitTest {
         );
         @SuppressWarnings("unchecked") final GremlinEntityInformation info =
                 GremlinEntityInformation.get(Relationship.class);
-        gremlinSource = info.getGremlinSource();
+        gremlinSource = info.createGremlinSource();
         this.converter.write(relationship, gremlinSource);
     }
 
@@ -89,11 +89,11 @@ public class GremlinScriptLiteralEdgeUnitTest {
     public void testGenerateUpdateScript() {
         final List<String> queryList = new GremlinScriptLiteralEdge().generateUpdateScript(gremlinSource);
         assertEquals(queryList.get(0), "g.E('456')" +
-                ".property('person', '{\"id\":\"123\",\"name\":\"bill\"}')" +
-                ".property('name', 'rel-name')" +
-                ".property('project', '{\"id\":\"321\",\"name\":\"ms-project\",\"uri\":\"http\"}')" +
-                ".property('location', 'china')" +
-                ".property('_classname', 'com.microsoft.spring.data.gremlin.common.domain.Relationship')");
+                ".property(single, 'person', '{\"id\":\"123\",\"name\":\"bill\"}')" +
+                ".property(single, 'name', 'rel-name')" +
+                ".property(single, 'project', '{\"id\":\"321\",\"name\":\"ms-project\",\"uri\":\"http\"}')" +
+                ".property(single, 'location', 'china')" +
+                ".property(single, '_classname', 'com.microsoft.spring.data.gremlin.common.domain.Relationship')");
     }
 
     @Test

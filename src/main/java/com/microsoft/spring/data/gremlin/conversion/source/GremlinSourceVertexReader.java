@@ -9,13 +9,14 @@ package com.microsoft.spring.data.gremlin.conversion.source;
 import com.microsoft.spring.data.gremlin.common.Constants;
 import com.microsoft.spring.data.gremlin.common.GremlinUtils;
 import com.microsoft.spring.data.gremlin.conversion.MappingGremlinConverter;
+import com.microsoft.spring.data.gremlin.exception.GremlinReadPropertyException;
 import com.microsoft.spring.data.gremlin.exception.GremlinUnexpectedSourceTypeException;
 import com.microsoft.spring.data.gremlin.mapping.GremlinPersistentEntity;
+import org.springframework.core.convert.ConversionFailedException;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mapping.PersistentProperty;
 import org.springframework.data.mapping.model.ConvertingPropertyAccessor;
 import org.springframework.lang.NonNull;
-import org.springframework.util.Assert;
 import java.lang.reflect.Field;
 
 import lombok.NoArgsConstructor;
@@ -38,15 +39,24 @@ public class GremlinSourceVertexReader extends AbstractGremlinSourceReader imple
             final PersistentProperty property = persistentEntity.getPersistentProperty(field.getName());
 
             if (property != null) {
-                Assert.notNull(property, "persistence property should not be null");
-
                 if (field.getName().equals(Constants.PROPERTY_ID) ||
                     field.getAnnotation(Id.class) != null) {
-                    accessor.setProperty(property, source.getId());
+                    accessor.setProperty(property, super.getGremlinSourceId(source));
                 } else {
-                    final Object sourceValue = source.getProperties().get(field.getName());
-                    accessor.setProperty(property,
-                        sourceValue != null ? super.readProperty(property, sourceValue) : null);
+                    final Object sourceValue =
+                        source.getProperties().get(field.getName());
+                    try {
+                        accessor.setProperty(property,
+                            sourceValue == null ||
+                                "null".equalsIgnoreCase(sourceValue.toString()) ? null :
+                                super.readProperty(property, sourceValue));
+                    } catch (ConversionFailedException cfe) {
+                        throw new GremlinReadPropertyException(
+                            domainClass,
+                            property,
+                            sourceValue,
+                            cfe);
+                    }
                 }
             }
         }

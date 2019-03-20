@@ -43,7 +43,7 @@ public class GremlinScriptLiteralVertexUnitTest {
 
         final Person person = new Person("123", "bill");
         @SuppressWarnings("unchecked") final GremlinEntityInformation info = GremlinEntityInformation.get(Person.class);
-        this.gremlinSource = info.getGremlinSource();
+        this.gremlinSource = info.createGremlinSource();
         this.converter.write(person, gremlinSource);
     }
 
@@ -76,8 +76,8 @@ public class GremlinScriptLiteralVertexUnitTest {
     @Test
     public void testGenerateUpdateScript() {
         final List<String> queryList = new GremlinScriptLiteralVertex().generateUpdateScript(gremlinSource);
-        assertEquals(queryList.get(0), "g.V('123').property('name', 'bill')" +
-                ".property('_classname', 'com.microsoft.spring.data.gremlin.common.domain.Person')");
+        assertEquals(queryList.get(0), "g.V('123').property(single, 'name', 'bill')" +
+                ".property(single, '_classname', 'com.microsoft.spring.data.gremlin.common.domain.Person')");
     }
 
     @Test

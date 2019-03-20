@@ -57,7 +57,7 @@ public class CriteriaUnitTest {
         final GremlinEntityInformation<Person, String> personInfo =
             GremlinEntityInformation.get(Person.class);
         final QueryFindScriptGenerator findScriptGenerator =
-            new QueryFindScriptGenerator(personInfo.getGremlinSource());
+            new QueryFindScriptGenerator(personInfo.createGremlinSource());
 
         final GremlinQuery query = new GremlinQuery(notCriteria);
         final List<String> stringList = findScriptGenerator.generate(query);

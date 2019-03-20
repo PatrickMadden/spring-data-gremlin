@@ -97,8 +97,7 @@ public abstract class AbstractGremlinScriptLiteral {
     }
 
 
-    protected static String generateHasShared(List<String> hasInputs)
-    {
+    protected static String generateHasShared(List<String> hasInputs) {
         final int listSize = hasInputs.size();
         String hasFragment;
 

@@ -51,6 +51,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 
 import static java.util.stream.Collectors.toList;
 
@@ -64,7 +65,7 @@ public class GremlinTemplate implements GremlinOperations, ApplicationContextAwa
     private ApplicationContext context;
 
     //static final int numberOfVirtualCPUs = 4;
-    static final ExecutorService executor = Executors.newFixedThreadPool(
+    static final ExecutorService EXECUTOR = Executors.newFixedThreadPool(
         Runtime.getRuntime().availableProcessors());
 
     static Logger logger = LoggerFactory.getLogger(GremlinTemplate.class);
@@ -106,11 +107,11 @@ public class GremlinTemplate implements GremlinOperations, ApplicationContextAwa
     }
 
     @NonNull
-    private List<Result> executeQuery(@NonNull List<String> queries) {
+    public List<Result> executeQuery(@NonNull List<String> queries) {
         return executeQueryUsingExecutorService(queries);
 //        final List<List<String>> parallelQueries = GremlinUtils.toParallelQueryList(queries);
 //
-//        return parallelQueries.stream().flatMap(q -> executeQueryExecutor(q).stream()).collect(Collectors.toList());
+//        return parallelQueries.stream().flatMap(q -> executeQueryParallel(q).stream()).collect(Collectors.toList());
     }
 
 //    @NonNull
@@ -129,7 +130,7 @@ public class GremlinTemplate implements GremlinOperations, ApplicationContextAwa
 
 
 
-    protected List<Result> executeQueryUsingExecutorService(@NonNull List<String> queries) {
+    protected List<Result>  executeQueryUsingExecutorService(@NonNull List<String> queries) {
         final List<CompletableFuture<List<Result>>> futures =
             queries.stream()
                 .map(query -> CompletableFuture.supplyAsync(() ->
@@ -138,7 +139,7 @@ public class GremlinTemplate implements GremlinOperations, ApplicationContextAwa
                         Thread.currentThread().getName(),
                         query);
                     return this.getGremlinClient().submit(query).all().join();
-                }, executor))
+                }, EXECUTOR))
                 .collect(Collectors.toList());
 
         final List<List<Result>> collect =
@@ -157,13 +158,10 @@ public class GremlinTemplate implements GremlinOperations, ApplicationContextAwa
      * @return The long value of the {@link Result} returned from the query.
      */
     public long executeLongQuery(@NonNull String query) {
-        try
-        {
+        try {
             final Result result = this.getGremlinClient().submit(query).one();
             return result.getLong();
-        }
-        catch (Throwable e)
-        {
+        } catch (Throwable e) {
             throw new GremlinQueryException(String
                 .format("unable to complete execute %s from gremlin", query), e);
         }
@@ -175,6 +173,8 @@ public class GremlinTemplate implements GremlinOperations, ApplicationContextAwa
         final List<String> queryList = script.generateDeleteAllScript();
 
         executeQuery(queryList);
+
+        clearDomainCache();
     }
 
     @Override
@@ -182,6 +182,14 @@ public class GremlinTemplate implements GremlinOperations, ApplicationContextAwa
         final GremlinSource source = type.createGremlinSource();
 
         executeQuery(source.getGremlinScriptLiteral().generateDeleteAllScript());
+
+        if (source instanceof GremlinSourceEdge) {
+            this.idToDomainEdges.clear();
+        } else if (source instanceof GremlinSourceVertex) {
+            this.idToDomainVertices.clear();
+        } else if (source instanceof GremlinSourceGraph) {
+            clearDomainCache();
+        }
     }
 
     @Override
@@ -191,10 +199,43 @@ public class GremlinTemplate implements GremlinOperations, ApplicationContextAwa
 
     public <T> void deleteAll(@NonNull Class<T> domainClass) {
         @SuppressWarnings("unchecked") final GremlinEntityInformation info = GremlinEntityInformation.get(domainClass);
-        final GremlinSource source = info.getGremlinSource();
+        final GremlinSource source = info.createGremlinSource();
         final List<String> queryList = source.getGremlinScriptLiteral().generateDeleteAllByClassScript(source);
 
         this.executeQuery(queryList);
+
+        if (source instanceof GremlinSourceEdge)
+        {
+            final List<Object> toRemove = new ArrayList<>();
+
+            this.idToDomainEdges.forEach((o, o2) -> {
+                if (o2.getClass().equals(domainClass))
+                {
+                    toRemove.add(o2);
+                }
+            });
+
+            toRemove.forEach(o -> this.idToDomainEdges.remove(info.getId(o)));
+
+        }
+        else if (source instanceof GremlinSourceVertex)
+        {
+            final List<Object> toRemove = new ArrayList<>();
+
+            this.idToDomainVertices.forEach((o, o2) -> {
+                if (o2.getClass().equals(domainClass))
+                {
+                    toRemove.add(o2);
+                }
+            });
+
+            toRemove.forEach(o -> this.idToDomainVertices.remove(info.getId(o)));
+
+        }
+        else if (source instanceof GremlinSourceGraph)
+        {
+           clearDomainCache();
+        }
     }
 
     private <T> List<Result> insertInternal(@NonNull T object, @NonNull GremlinSource<T> source) {
@@ -306,31 +347,28 @@ public class GremlinTemplate implements GremlinOperations, ApplicationContextAwa
 
         if (source instanceof GremlinSourceEdge) {
             cachedInstance = idToDomainEdges.get(id);
-        }
-        else if (source instanceof GremlinSourceVertex) {
+        } else if (source instanceof GremlinSourceVertex) {
             cachedInstance = idToDomainVertices.get(id);
-        }
-        else {
+        } else {
             cachedInstance = null;
         }
 
-        if (cachedInstance == null)
-        {
+        if (cachedInstance == null) {
+
             final List<String> queryList =
                 source.getGremlinScriptLiteral().generateFindByIdScript(source);
             final List<Result> results = this.executeQuery(queryList);
 
-            if (results.isEmpty())
-            {
+            if (results.isEmpty()) {
                 return null;
             }
 
             return recoverDomain(source, results);
-        }
-        else
-        {
+
+        } else {
             return (T) cachedInstance;
         }
+
     }
 
     @Override
@@ -405,6 +443,12 @@ public class GremlinTemplate implements GremlinOperations, ApplicationContextAwa
         final List<String> queryList = source.getGremlinScriptLiteral().generateDeleteByIdScript(source);
 
         executeQuery(queryList);
+
+        if (source instanceof GremlinSourceEdge) {
+            this.idToDomainEdges.remove(id);
+        } else if (source instanceof GremlinSourceVertex) {
+            this.idToDomainVertices.remove(id);
+        }
     }
 
     @Override
@@ -442,7 +486,7 @@ public class GremlinTemplate implements GremlinOperations, ApplicationContextAwa
     @Override
     public <T> long vertexCount(Class<T> domainClass) {
         final GremlinEntityInformation info = GremlinEntityInformation.get(domainClass);
-        final GremlinSource source = info.getGremlinSource();
+        final GremlinSource source = info.createGremlinSource();
 
         final GremlinScriptLiteralVertex script = new GremlinScriptLiteralVertex();
         final List<String> query = script.generateCountLabelScript(source);
@@ -454,7 +498,7 @@ public class GremlinTemplate implements GremlinOperations, ApplicationContextAwa
     @Override
     public <T> long edgeCount(Class<T> domainClass) {
         final GremlinEntityInformation info = GremlinEntityInformation.get(domainClass);
-        final GremlinSource source = info.getGremlinSource();
+        final GremlinSource source = info.createGremlinSource();
 
         final GremlinScriptLiteralEdge script = new GremlinScriptLiteralEdge();
         final List<String> query = script.generateCountLabelScript(source);
@@ -507,6 +551,13 @@ public class GremlinTemplate implements GremlinOperations, ApplicationContextAwa
     public <T> List<T> find(@NonNull GremlinQuery query, @NonNull GremlinSource<T> source) {
         final QueryScriptGenerator generator = new QueryFindScriptGenerator(source);
         final List<String> queryList = generator.generate(query);
+
+        return find(queryList, source);
+    }
+
+
+    @Override
+    public <T> List<T> find(@NonNull List<String> queryList, GremlinSource<T> source) {
         final List<Result> results = this.executeQuery(queryList);
 
         if (results.isEmpty()) {
@@ -514,6 +565,12 @@ public class GremlinTemplate implements GremlinOperations, ApplicationContextAwa
         }
 
         return this.recoverDomainList(source, results);
+    }
+
+
+    @Override
+    public <T> List<T> saveAll(List<T> domains) {
+        return StreamSupport.stream(domains.spliterator(), true).map(this::save).collect(toList());
     }
 }
 

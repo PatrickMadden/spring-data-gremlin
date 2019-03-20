@@ -10,13 +10,14 @@ import com.microsoft.spring.data.gremlin.annotation.EdgeFrom;
 import com.microsoft.spring.data.gremlin.annotation.EdgeTo;
 import com.microsoft.spring.data.gremlin.common.GremlinUtils;
 import com.microsoft.spring.data.gremlin.conversion.MappingGremlinConverter;
+import com.microsoft.spring.data.gremlin.exception.GremlinReadPropertyException;
 import com.microsoft.spring.data.gremlin.exception.GremlinUnexpectedSourceTypeException;
 import com.microsoft.spring.data.gremlin.mapping.GremlinPersistentEntity;
+import org.springframework.core.convert.ConversionFailedException;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mapping.PersistentProperty;
 import org.springframework.data.mapping.model.ConvertingPropertyAccessor;
 import org.springframework.lang.NonNull;
-import org.springframework.util.Assert;
 import java.lang.reflect.Field;
 
 import lombok.NoArgsConstructor;
@@ -41,11 +42,10 @@ public class GremlinSourceEdgeReader extends AbstractGremlinSourceReader impleme
            final PersistentProperty property = persistentEntity.getPersistentProperty(field.getName());
 
            if (property != null) {
-               Assert.notNull(property, "persistence property should not be null");
 
                if (field.getName().equals(PROPERTY_ID) ||
                    field.getAnnotation(Id.class) != null) {
-                   accessor.setProperty(property, source.getId());
+                   accessor.setProperty(property, super.getGremlinSourceId(source));
                } else if (field.getAnnotation(EdgeFrom.class) != null ||
                    field.getAnnotation(EdgeTo.class) != null) {
                    // We cannot do that here as the gremlin will not tell more information
@@ -55,9 +55,17 @@ public class GremlinSourceEdgeReader extends AbstractGremlinSourceReader impleme
                    // That work will be wrapped in GremlinTemplate insert, and skip the property here.
                } else {
                    final Object sourceValue = source.getProperties().get(field.getName());
-                   accessor.setProperty(property,
-                       sourceValue != null ? super.readProperty(property, sourceValue) :
-                           null);
+                   try {
+                       accessor.setProperty(property,
+                           sourceValue == null || NULLHASH == sourceValue.hashCode() ?
+                               null : super.readProperty(property, sourceValue));
+                   } catch (ConversionFailedException cfe) {
+                       throw new GremlinReadPropertyException(
+                           domainClass,
+                           property,
+                           sourceValue,
+                           cfe);
+                   }
                }
            }
        }

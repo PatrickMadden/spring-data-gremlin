@@ -31,7 +31,16 @@ public class Constants {
     public static final String DEFAULT_REPOSITORY_IMPLEMENT_POSTFIX = "Impl";
     public static final int DEFAULT_MAX_CONTENT_LENGTH = 65536;
     public static final int DEFAULT_MAX_WAIT_FOR_CONNECTION = 3000;
+    public static final int DEFAULT_MAX_WAIT_FOR_SESSION_CLOSE = 3000;
     public static final Serializers DEFAULT_SERIALIZERS = Serializers.GRAPHSON;
+    public static final int DEFAULT_MIN_CONNECTION_POOL_SIZE = 2;
+    public static final int DEFAULT_MAX_CONNECTION_POOL_SIZE = 8;
+    public static final int DEFUAULT_MIN_SIMULTANEOUS_USAGE_PER_CONNECTION = 8;
+    public static final int DEFUAULT_MAX_SIMULTANEOUS_USAGE_PER_CONNECTION = 16;
+    public static final int DEFAULT_MIN_IN_PROCESS_PER_CONNECTION = 1;
+    public static final int DEFAULT_MAX_IN_PROCESS_PER_CONNECTION = 4;
+    public static final long DEFAULT_KEEP_ALIVE_INTERVAL = 1800000L;
+    public static final int DEFAULT_WORKER_POOL_SIZE = Runtime.getRuntime().availableProcessors() * 2;
 
     public static final String GREMLIN_MODULE_NAME = "Gremlin";
     public static final String GREMLIN_MODULE_PREFIX = "gremlin";

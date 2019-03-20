@@ -110,7 +110,7 @@ public class GremlinScriptLiteralEdge extends AbstractGremlinScriptLiteral imple
         scriptList.add(GREMLIN_PRIMITIVE_GRAPH);                                  // g
         scriptList.add(generateEntityWithRequiredId(source.getId().get(), EDGE)); // E(id)
 
-        scriptList.addAll(generateProperties(source.getProperties()));
+        scriptList.addAll(generateUpdateProperties(source.getProperties()));
 
         return completeScript(scriptList);
     }

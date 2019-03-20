@@ -117,7 +117,7 @@ public class GremlinUtils {
     }
 
     public static <T> GremlinSource<T> toGremlinSource(@NonNull Class<T> domainClass) {
-        return GremlinEntityInformation.get(domainClass).getGremlinSource();
+        return GremlinEntityInformation.get(domainClass).createGremlinSource();
     }
 
     public static List<List<String>> toParallelQueryList(@NonNull List<String> queries) {

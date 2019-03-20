@@ -14,13 +14,14 @@ import org.apache.tinkerpop.shaded.jackson.databind.type.TypeFactory;
 import org.springframework.data.mapping.PersistentProperty;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
-import java.io.IOException;
 import java.lang.reflect.Field;
 import java.util.Date;
 
 import lombok.NonNull;
 
 public abstract class AbstractGremlinSourceReader {
+
+    public static final int NULLHASH = "null".hashCode();
 
     protected Object readProperty(@NonNull PersistentProperty property, @Nullable Object value) {
         final Class<?> type = property.getTypeInformation().getType();
@@ -44,13 +45,12 @@ public abstract class AbstractGremlinSourceReader {
             } else {
                 final String strValue = (String) value;
 
-                if ("null".equalsIgnoreCase(strValue)) {
+                if (NULLHASH == value.hashCode()) {
                     return null;
                 } else {
                     try {
                         return new Date(Long.parseLong(strValue));
-                    }
-                    catch (NumberFormatException nfe) {
+                    } catch (NumberFormatException nfe) {
                         throw new GremlinUnexpectedEntityTypeException(
                             "Failed to read String to Datae with value " + strValue);
                     }
@@ -59,10 +59,17 @@ public abstract class AbstractGremlinSourceReader {
         } else {
             final Object object;
 
+            final String strValue = value.toString();
             try {
-                object = GremlinUtils.getObjectMapper().readValue(value.toString(), javaType);
-            } catch (IOException e) {
-                throw new GremlinUnexpectedEntityTypeException("Failed to read String to Object", e);
+                object = (NULLHASH == strValue.hashCode()) ? null :
+                    GremlinUtils.getObjectMapper().readValue(strValue, javaType);
+            } catch (Throwable e) {
+                throw new GremlinUnexpectedEntityTypeException(
+                    "Failed to read String to Object for property " +
+                    property.getName() +
+                    " and value " +
+                        strValue,
+                    e);
             }
 
             return object;

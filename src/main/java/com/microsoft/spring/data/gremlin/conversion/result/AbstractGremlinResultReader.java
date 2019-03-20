@@ -11,7 +11,7 @@ import com.microsoft.spring.data.gremlin.conversion.source.GremlinSource;
 import org.springframework.lang.NonNull;
 import org.springframework.util.Assert;
 import java.util.ArrayList;
-import java.util.LinkedHashMap;
+import java.util.HashMap;
 import java.util.Map;
 
 import lombok.NoArgsConstructor;
@@ -23,16 +23,16 @@ public abstract class AbstractGremlinResultReader {
     /**
      * properties's organization is a little complicated.
      * <p>
-     * properties is LinkedHashMap<K, V>
+     * properties is HashMap<K, V>
      * K is String
      * V is ArrayList<T>
-     * T is LinkedHashMap<String, String>
+     * T is HashMap<String, String>
      */
     private Object readProperty(@NonNull Object value) {
         Assert.isInstanceOf(ArrayList.class, value, "should be instance of ArrayList");
 
-        @SuppressWarnings("unchecked") final ArrayList<LinkedHashMap<String, String>> mapList
-                = (ArrayList<LinkedHashMap<String, String>>) value;
+        @SuppressWarnings("unchecked") final ArrayList<HashMap<String, String>> mapList
+                = (ArrayList<HashMap<String, String>>) value;
 
         Assert.isTrue(mapList.size() == 1, "should be only 1 element in ArrayList");
 
