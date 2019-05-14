@@ -121,14 +121,14 @@ public class GremlinScriptLiteralEdge extends AbstractGremlinScriptLiteral imple
             throw new GremlinUnexpectedSourceTypeException("should be the instance of GremlinSourceEdge");
         }
 
-        final String className = source.getProperties().get(GREMLIN_PROPERTY_CLASSNAME).toString();
-        Assert.notNull(className, "GremlinSource should contain predefined className");
+        //final String className = source.getProperties().get(GREMLIN_PROPERTY_CLASSNAME).toString();
+        //Assert.notNull(className, "GremlinSource should contain predefined className");
 
         final List<String> scriptList = Arrays.asList(
                 GREMLIN_PRIMITIVE_GRAPH,                           // g
                 GREMLIN_PRIMITIVE_EDGE_ALL,                        // E()
-                generateHasLabel(source.getLabel()),               // has(label, 'label')
-                generateHas(GREMLIN_PROPERTY_CLASSNAME, className) // has(_classname, 'xxxxxx')
+                generateHasLabel(source.getLabel())                // has(label, 'label')
+                //generateHas(GREMLIN_PROPERTY_CLASSNAME, className) // has(_classname, 'xxxxxx')
         );
 
         return completeScript(scriptList);

@@ -65,9 +65,9 @@ public class GremlinResultEdgeReader extends AbstractGremlinResultReader impleme
 
         this.readProperties(source, (Map) map.get(PROPERTY_PROPERTIES));
 
-        final String className = source.getProperties().get(GREMLIN_PROPERTY_CLASSNAME).toString();
+        //final String className = source.getProperties().get(GREMLIN_PROPERTY_CLASSNAME).toString();
 
-        sourceEdge.setIdField(GremlinUtils.getIdField(GremlinUtils.toEntityClass(className)));
+        sourceEdge.setIdField(GremlinUtils.getIdField(source.getDomainClass()));
         sourceEdge.setId(map.get(PROPERTY_ID));
         sourceEdge.setLabel(map.get(PROPERTY_LABEL).toString());
         sourceEdge.setVertexIdFrom(map.get(PROPERTY_OUTV));

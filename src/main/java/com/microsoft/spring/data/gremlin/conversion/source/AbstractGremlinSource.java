@@ -24,7 +24,7 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
 
-import static com.microsoft.spring.data.gremlin.common.Constants.GREMLIN_PROPERTY_CLASSNAME;
+//import static com.microsoft.spring.data.gremlin.common.Constants.GREMLIN_PROPERTY_CLASSNAME;
 
 public abstract class AbstractGremlinSource<T> implements GremlinSource<T> {
 
@@ -66,7 +66,7 @@ public abstract class AbstractGremlinSource<T> implements GremlinSource<T> {
         this.domainClass = domainClass;
         this.properties = new HashMap<>();
 
-        setProperty(GREMLIN_PROPERTY_CLASSNAME, domainClass.getName());
+        //setProperty(GREMLIN_PROPERTY_CLASSNAME, domainClass.getName());
     }
 
     @Override

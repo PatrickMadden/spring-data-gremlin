@@ -99,20 +99,40 @@ public class GremlinScriptLiteralVertex extends AbstractGremlinScriptLiteral imp
         return completeScript(scriptList);
     }
 
+//    @Override
+//    public List<String> generateFindAllScript(@NonNull GremlinSource source) {
+//        if (!(source instanceof GremlinSourceVertex)) {
+//            throw new GremlinUnexpectedSourceTypeException("should be the instance of GremlinSourceVertex");
+//        }
+//
+//        final String classname = source.getProperties().get(GREMLIN_PROPERTY_CLASSNAME).toString();
+//        Assert.notNull(classname, "GremlinSource should contain predefined classname");
+//
+//        final List<String> scriptList = Arrays.asList(
+//                GREMLIN_PRIMITIVE_GRAPH,                           // g
+//                GREMLIN_PRIMITIVE_VERTEX_ALL,                      // V()
+//                generateHasLabel(source.getLabel()),               // has(label, 'label')
+//                generateHas(GREMLIN_PROPERTY_CLASSNAME, classname) // has(_classname, 'xxxxxx')
+//        );
+//
+//        return completeScript(scriptList);
+//    }
+
+
     @Override
     public List<String> generateFindAllScript(@NonNull GremlinSource source) {
         if (!(source instanceof GremlinSourceVertex)) {
             throw new GremlinUnexpectedSourceTypeException("should be the instance of GremlinSourceVertex");
         }
 
-        final String classname = source.getProperties().get(GREMLIN_PROPERTY_CLASSNAME).toString();
-        Assert.notNull(classname, "GremlinSource should contain predefined classname");
+        //final String classname = source.getProperties().get(GREMLIN_PROPERTY_CLASSNAME).toString();
+        //Assert.notNull(classname, "GremlinSource should contain predefined classname");
 
         final List<String> scriptList = Arrays.asList(
-                GREMLIN_PRIMITIVE_GRAPH,                           // g
-                GREMLIN_PRIMITIVE_VERTEX_ALL,                      // V()
-                generateHasLabel(source.getLabel()),               // has(label, 'label')
-                generateHas(GREMLIN_PROPERTY_CLASSNAME, classname) // has(_classname, 'xxxxxx')
+            GREMLIN_PRIMITIVE_GRAPH,                           // g
+            GREMLIN_PRIMITIVE_VERTEX_ALL,                      // V()
+            generateHasLabel(source.getLabel())                // has(label, 'label')
+            //generateHas(GREMLIN_PROPERTY_CLASSNAME, classname) // has(_classname, 'xxxxxx')
         );
 
         return completeScript(scriptList);

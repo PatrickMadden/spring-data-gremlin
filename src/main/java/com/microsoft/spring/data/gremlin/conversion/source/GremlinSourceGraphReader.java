@@ -64,13 +64,7 @@ public class GremlinSourceGraphReader extends AbstractGremlinSourceReader implem
         final List<Object> domainObjects = new ArrayList<>();
 
         for (final GremlinSource source : sources) {
-            try {
-                domainClass = Class.forName((String) source.getProperties().get(Constants.GREMLIN_PROPERTY_CLASSNAME));
-            } catch (ClassNotFoundException e) {
-                throw new GremlinUnexpectedSourceTypeException("No Java class found for source property "
-                        + Constants.GREMLIN_PROPERTY_CLASSNAME, e);
-            }
-
+            domainClass = source.getDomainClass();
             // TODO: seems unnecessary here.
             source.setIdField(GremlinEntityInformation.get(domainClass).getIdField());
             domainObjects.add(source.doGremlinSourceRead(domainClass, converter));
