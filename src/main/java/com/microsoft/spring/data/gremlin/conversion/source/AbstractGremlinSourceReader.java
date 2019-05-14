@@ -34,6 +34,10 @@ public abstract class AbstractGremlinSourceReader {
                 || type == String.class) {
             return value;
         } else if (type == Date.class) {
+            if (value instanceof Date) {
+                return value;
+            }
+
             Assert.isTrue(value instanceof Long || value instanceof Integer || value instanceof String,
                 "Date store value must be instance of long or int. Data store value is " + value.getClass().getName());
 
