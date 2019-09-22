@@ -7,14 +7,14 @@ package com.microsoft.spring.data.gremlin.conversion.script;
 
 
 import com.microsoft.spring.data.gremlin.common.Constants;
+import com.microsoft.spring.data.gremlin.common.GremlinUtils;
 import com.microsoft.spring.data.gremlin.conversion.source.GremlinSource;
 import com.microsoft.spring.data.gremlin.conversion.source.GremlinSourceEdge;
+import com.microsoft.spring.data.gremlin.exception.GremlinUnexpectedEntityTypeException;
 import com.microsoft.spring.data.gremlin.exception.GremlinUnexpectedSourceTypeException;
+import org.apache.tinkerpop.shaded.jackson.core.JsonProcessingException;
 import org.springframework.util.Assert;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
 import lombok.NoArgsConstructor;
 import lombok.NonNull;
@@ -180,6 +180,30 @@ public class GremlinScriptLiteralEdge extends AbstractGremlinScriptLiteral imple
         );
 
         return Collections.singletonList(String.join(Constants.GREMLIN_PRIMITIVE_INVOKE, scriptList));
+    }
+
+    protected String generateUpdateProperty(@NonNull String name, Object value) {
+        if (value instanceof Integer) {
+            return generateProperty(name, (Integer) value);
+        } else if (value instanceof Boolean) {
+            return generateProperty(name, (Boolean) value);
+        } else if (value instanceof String) {
+            return generateProperty(name, (String) value);
+        } else if (value instanceof Double) {
+            return generateProperty(name, (Double) value);
+        } else if (value instanceof Date) {
+            return generateProperty(name, GremlinUtils.timeToMilliSeconds(value));
+        } else {
+            final String propertyScript;
+
+            try {
+                propertyScript = generateProperty(name, GremlinUtils.getObjectMapper().writeValueAsString(value));
+            } catch (JsonProcessingException e) {
+                throw new GremlinUnexpectedEntityTypeException("Failed to write object to String", e);
+            }
+
+            return propertyScript;
+        }
     }
 }
 
