@@ -155,7 +155,9 @@ public abstract class AbstractGremlinScriptLiteral {
             try {
                 propertyScript = generateProperty(name, GremlinUtils.getObjectMapper().writeValueAsString(value));
             } catch (JsonProcessingException e) {
-                throw new GremlinUnexpectedEntityTypeException("Failed to write object to String", e);
+                throw new GremlinUnexpectedEntityTypeException(
+                    "Failed to write object to String. Property name is " + name +
+                     "Value is a " + value != null ? value.getClass().toString() : "null", e);
             }
 
             return propertyScript;
