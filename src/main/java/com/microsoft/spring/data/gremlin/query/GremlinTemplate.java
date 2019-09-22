@@ -310,25 +310,51 @@ public class GremlinTemplate implements GremlinOperations, ApplicationContextAwa
      * This function will do that and make edge domain completion.
      */
     protected <T> void completeEdge(@NonNull T domain, @NonNull GremlinSourceEdge source) {
-        final Object cachedSourceVertex = this.idToDomainVertices.get(source.getVertexIdFrom());
-        final Object cachedTargetVertex = this.idToDomainVertices.get(source.getVertexIdTo());
+        final Object cachedSourceVertex =
+            this.idToDomainVertices.get(source.getVertexIdFrom());
+        final Object cachedTargetVertex =
+            this.idToDomainVertices.get(source.getVertexIdTo());
 
-        final ConvertingPropertyAccessor accessor = this.mappingConverter.getPropertyAccessor(domain);
-        final GremlinPersistentEntity persistentEntity = this.mappingConverter.getPersistentEntity(domain.getClass());
+        final ConvertingPropertyAccessor accessor =
+            this.mappingConverter.getPropertyAccessor(domain);
+        final GremlinPersistentEntity persistentEntity =
+            this.mappingConverter.getPersistentEntity(domain.getClass());
 
-        final Field fromField = this.getEdgeAnnotatedField(domain.getClass(), EdgeFrom.class);
-        final Field toField = this.getEdgeAnnotatedField(domain.getClass(), EdgeTo.class);
+        final Field fromField =
+            this.getEdgeAnnotatedField(domain.getClass(), EdgeFrom.class);
+        final Field toField =
+            this.getEdgeAnnotatedField(domain.getClass(), EdgeTo.class);
 
-        final PersistentProperty propertyFrom = persistentEntity.getPersistentProperty(fromField.getName());
-        final PersistentProperty propertyTo = persistentEntity.getPersistentProperty(toField.getName());
+        try {
+            final PersistentProperty propertyFrom =
+                persistentEntity.getPersistentProperty(fromField.getName());
+            final PersistentProperty propertyTo =
+                persistentEntity.getPersistentProperty(toField.getName());
 
-        Assert.notNull(propertyFrom, "persistence property should not be null");
-        Assert.notNull(propertyTo, "persistence property should not be null");
+            Assert.notNull(propertyFrom, "persistence property should not be null");
+            Assert.notNull(propertyTo, "persistence property should not be null");
 
-        accessor.setProperty(propertyFrom, cachedSourceVertex == null ?
-            this.getEdgeAnnotatedFieldValue(fromField, source.getVertexIdFrom()) : cachedSourceVertex);
-        accessor.setProperty(propertyTo, cachedTargetVertex == null ?
-            this.getEdgeAnnotatedFieldValue(toField, source.getVertexIdTo()) : cachedTargetVertex);
+            accessor.setProperty(propertyFrom, cachedSourceVertex == null ?
+                this.getEdgeAnnotatedFieldValue(fromField, source.getVertexIdFrom()) :
+                cachedSourceVertex);
+            accessor.setProperty(propertyTo, cachedTargetVertex == null ?
+                this.getEdgeAnnotatedFieldValue(toField, source.getVertexIdTo()) :
+                cachedTargetVertex);
+        }
+        catch (Throwable th) {
+            final String errorMsg = "Complete edge failed for domain class " +
+                domain.getClass().getSimpleName() +
+                " with id = " + source.getId().get() +
+                ". fromField = " + fromField.getName() +
+                ", vertexIdFrom = " + source.getVertexIdFrom() +
+                ", toField = " + toField.getName() +
+                ", vertexIdTo = " + source.getVertexIdFrom();
+
+            logger.error(errorMsg);
+
+            throw new RuntimeException(errorMsg);
+        }
+
     }
 
     @Override
