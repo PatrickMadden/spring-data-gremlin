@@ -74,6 +74,7 @@ public class GremlinSourceEdgeWriter implements GremlinSourceWriter {
                             "The vertex id for the from vertex cannot be null!");
                     }
                     sourceEdge.setVertexIdFrom(vertexId);
+                    continue;
                 } else if (field.getAnnotation(EdgeTo.class) != null) {
                     final Object vertexId = this.getIdValue(object, converter);
                     if (vertexId == null) {
@@ -81,6 +82,7 @@ public class GremlinSourceEdgeWriter implements GremlinSourceWriter {
                             "The vertex id for the to vertex cannot be null!");
                     }
                     sourceEdge.setVertexIdTo(vertexId);
+                    continue;
                 }
                 source.setProperty(field.getName(), accessor.getProperty(property));
             }
