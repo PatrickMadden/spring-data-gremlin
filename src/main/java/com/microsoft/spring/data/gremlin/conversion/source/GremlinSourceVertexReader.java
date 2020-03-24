@@ -12,6 +12,7 @@ import com.microsoft.spring.data.gremlin.exception.GremlinReadPropertyException;
 import com.microsoft.spring.data.gremlin.exception.GremlinUnexpectedSourceTypeException;
 import com.microsoft.spring.data.gremlin.mapping.GremlinPersistentEntity;
 import org.springframework.core.convert.ConversionFailedException;
+import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mapping.PersistentProperty;
 import org.springframework.data.mapping.model.ConvertingPropertyAccessor;

@@ -99,7 +99,8 @@ public class GremlinScriptUnitTest {
 
         source.setProperty(fakeName, null);
 
-        Assert.assertEquals(source.getProperties().size(), 3); // one predefined property _classname
+        // For Microsoft they have predefined property _classname but TSS removed that requirement.
+        Assert.assertEquals(source.getProperties().size(), 2);
         Assert.assertNull(source.getProperties().get(fakeName));
     }
 }
