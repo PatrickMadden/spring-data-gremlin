@@ -5,11 +5,7 @@
  */
 package com.microsoft.spring.data.gremlin.query;
 
-
-import com.microsoft.spring.data.gremlin.common.GremlinConfig;
-import com.microsoft.spring.data.gremlin.common.GremlinFactory;
-import com.microsoft.spring.data.gremlin.common.TestConstants;
-import com.microsoft.spring.data.gremlin.common.TestGremlinProperties;
+import com.microsoft.spring.data.gremlin.common.*;
 import com.microsoft.spring.data.gremlin.common.domain.*;
 import com.microsoft.spring.data.gremlin.conversion.MappingGremlinConverter;
 import com.microsoft.spring.data.gremlin.conversion.source.GremlinSource;
@@ -35,10 +31,9 @@ import org.springframework.context.annotation.PropertySource;
 import org.springframework.data.annotation.Persistent;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+
 import java.util.Arrays;
 import java.util.List;
-
-import lombok.NoArgsConstructor;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @PropertySource(value = {"classpath:application.properties"})
@@ -564,11 +559,6 @@ public class GremlinTemplateIT {
 
         @Autowired
         private TestGremlinProperties properties;
-
-        @Bean
-        public TelemetryTracker getTelemetryTracker() {
-            return new EmptyTracker();
-        }
 
         @Bean
         public GremlinFactory getGremlinFactory() {

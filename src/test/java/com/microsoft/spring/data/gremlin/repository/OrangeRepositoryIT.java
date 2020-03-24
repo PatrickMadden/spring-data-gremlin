@@ -5,12 +5,11 @@
  */
 package com.microsoft.spring.data.gremlin.repository;
 
-
-import com.google.common.collect.Lists;
 import com.microsoft.spring.data.gremlin.common.TestRepositoryConfiguration;
 import com.microsoft.spring.data.gremlin.common.TestUtils;
 import com.microsoft.spring.data.gremlin.common.domain.Orange;
 import com.microsoft.spring.data.gremlin.common.repository.OrangeRepository;
+import org.assertj.core.util.Lists;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
@@ -19,6 +18,7 @@ import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;

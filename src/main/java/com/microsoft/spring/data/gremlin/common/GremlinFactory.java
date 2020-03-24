@@ -6,21 +6,19 @@
 package com.microsoft.spring.data.gremlin.common;
 
 import com.microsoft.spring.data.gremlin.exception.GremlinIllegalConfigurationException;
-import com.microsoft.spring.data.gremlin.telemetry.TelemetryTracker;
+import com.microsoft.spring.data.gremlin.telemetry.TelemetrySender;
 import org.apache.tinkerpop.gremlin.driver.Client;
 import org.apache.tinkerpop.gremlin.driver.Cluster;
 import org.apache.tinkerpop.gremlin.driver.ser.Serializers;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.lang.NonNull;
+
+import javax.annotation.PostConstruct;
 
 public class GremlinFactory {
 
     private Cluster gremlinCluster;
 
     private GremlinConfig gremlinConfig;
-
-    @Autowired
-    private TelemetryTracker telemetryTracker;
 
     public GremlinFactory(@NonNull GremlinConfig gremlinConfig) {
         final int port = gremlinConfig.getPort();
@@ -31,11 +29,7 @@ public class GremlinFactory {
         this.gremlinConfig = gremlinConfig;
     }
 
-    private void trackTelemetryCustomEvent() {
-        this.telemetryTracker.trackEvent(getClass().getSimpleName());
-    }
-
-    protected Cluster createGremlinCluster() throws GremlinIllegalConfigurationException {
+    private Cluster createGremlinCluster() throws GremlinIllegalConfigurationException {
         final Cluster cluster;
 
         try {
@@ -70,8 +64,6 @@ public class GremlinFactory {
             throw new GremlinIllegalConfigurationException("Invalid configuration of Gremlin", e);
         }
 
-        trackTelemetryCustomEvent();
-
         return cluster;
     }
 
@@ -82,5 +74,15 @@ public class GremlinFactory {
         }
 
         return this.gremlinCluster.connect();
+    }
+
+    @PostConstruct
+    private void sendTelemetry() {
+
+        if (gremlinConfig.isTelemetryAllowed()) {
+            final TelemetrySender sender = new TelemetrySender();
+
+            sender.send(this.getClass().getSimpleName());
+        }
     }
 }

@@ -5,7 +5,6 @@
  */
 package com.microsoft.spring.data.gremlin.conversion.source;
 
-
 import com.microsoft.spring.data.gremlin.common.Constants;
 import com.microsoft.spring.data.gremlin.common.GremlinUtils;
 import com.microsoft.spring.data.gremlin.conversion.MappingGremlinConverter;
@@ -17,9 +16,8 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.mapping.PersistentProperty;
 import org.springframework.data.mapping.model.ConvertingPropertyAccessor;
 import org.springframework.lang.NonNull;
-import java.lang.reflect.Field;
 
-import lombok.NoArgsConstructor;
+import java.lang.reflect.Field;
 
 @NoArgsConstructor
 public class GremlinSourceVertexReader extends AbstractGremlinSourceReader implements GremlinSourceReader {

@@ -5,7 +5,6 @@
  */
 package com.microsoft.spring.data.gremlin.conversion.source;
 
-
 import com.microsoft.spring.data.gremlin.annotation.EdgeSet;
 import com.microsoft.spring.data.gremlin.annotation.VertexSet;
 import com.microsoft.spring.data.gremlin.common.Constants;
@@ -13,15 +12,15 @@ import com.microsoft.spring.data.gremlin.common.GremlinUtils;
 import com.microsoft.spring.data.gremlin.conversion.MappingGremlinConverter;
 import com.microsoft.spring.data.gremlin.exception.GremlinUnexpectedSourceTypeException;
 import com.microsoft.spring.data.gremlin.mapping.GremlinPersistentEntity;
+import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mapping.PersistentProperty;
 import org.springframework.data.mapping.model.ConvertingPropertyAccessor;
 import org.springframework.lang.NonNull;
 import org.springframework.util.Assert;
+
 import java.lang.reflect.Field;
 import java.util.List;
-
-import lombok.NoArgsConstructor;
 
 @NoArgsConstructor
 public class GremlinSourceGraphWriter implements GremlinSourceWriter {
